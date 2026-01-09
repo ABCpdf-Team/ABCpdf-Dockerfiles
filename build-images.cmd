@@ -5,6 +5,7 @@ docker build . --file Runtimes/Ubuntu/22.04/ubuntu-22.04-aspnet-8.0.Dockerfile -
 docker build . --file Runtimes/Ubuntu/22.04/mcr-aspnet-6.0-jammy.Dockerfile -t abcpdf/mcr-aspnet:6.0-jammy
 docker build . --file Runtimes/Ubuntu/22.04/mcr-aspnet-7.0-jammy.Dockerfile -t abcpdf/mcr-aspnet:7.0-jammy
 docker build . --file Runtimes/Ubuntu/22.04/mcr-aspnet-8.0-jammy.Dockerfile -t abcpdf/mcr-aspnet:8.0-jammy
+docker build . --file Runtimes/Ubuntu/24.04/mcr-aspnet-10.0-noble.Dockerfile -t abcpdf/mcr-aspnet:10.0 -t abcpdf/mcr-aspnet:10.0-noble
 docker build . --file Runtimes/Debian/12/mcr-aspnet-6.0-bookworm-slim.Dockerfile -t abcpdf/mcr-aspnet:6.0-bookworm-slim
 docker build . --file Runtimes/Debian/12/mcr-aspnet-7.0-bookworm-slim.Dockerfile -t abcpdf/mcr-aspnet:7.0-bookworm-slim
 docker build . --file Runtimes/Debian/12/mcr-aspnet-8.0-bookworm-slim.Dockerfile -t abcpdf/mcr-aspnet:8.0-bookworm-slim
