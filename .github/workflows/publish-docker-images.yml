@@ -10,8 +10,7 @@
 name: Publish Docker image
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
 
 jobs:
   push_to_registry:
@@ -46,7 +45,7 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: 10.0 10.0-noble
-          # labels: ${{ steps.meta.outputs.labels }}
+          labels: ${{ steps.meta.outputs.labels }}
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v3
