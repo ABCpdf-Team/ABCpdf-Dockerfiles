@@ -35,7 +35,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
-          images: abcpdf/mcr-aspnet
+          images: abcpdf/mcr-aspnet:10.0-noble
 
       - name: Build and push Docker image
         id: push
@@ -44,7 +44,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: 10.0 10.0-noble
+          tags:  ${{ secrets.DOCKER_HUB_USERNAME }}/mcr-aspnet:${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Generate artifact attestation
