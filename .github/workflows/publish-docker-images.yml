@@ -44,7 +44,9 @@ jobs:
           context: .
           file: ./Runtimes/Ubuntu/24.04/mcr-aspnet-10.0-noble.Dockerfile
           push: true
-          tags: abcpdf/mcr-aspnet:10.0-noble abcpdf/mcr-aspnet:10.0
+          tags: |
+            abcpdf/mcr-aspnet:10.0
+            abcpdf/mcr-aspnet:10.0-noble
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Generate artifact attestation
