@@ -21,7 +21,7 @@ jobs:
     - name: Build Base Image
       run: |
         echo "Building base image: ${BASE_IMAGE_RC}"
-        docker build -f ./${{ matrix.base_images.dockerfilePath }} -t ${BASE_IMAGE_RC}
+        docker build -f ./${{ matrix.base_images.dockerfilePath }} -t ${BASE_IMAGE_RC} .
 
     - name: Setup dotnet
       uses: actions/setup-dotnet@v4
@@ -33,3 +33,4 @@ jobs:
         dotnet restore
         dotnet build --no-restore
         dotnet test --no-build -v detailed
+     
