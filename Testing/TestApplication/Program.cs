@@ -6,8 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 
-var abcPdfLicense = builder.Configuration["ABCPDF_LICENCE_KEY"];
-//	throw new InvalidOperationException("ABCpdf license key is not configured. Please configure the 'ABCpdf:LicenseKey' secret or environment variable.");
+var abcPdfLicense = builder.Configuration["ABCPDF_LICENSE_KEY"] ??
+	throw new InvalidOperationException("ABCpdf license key is not configured. Please configure the 'ABCpdf:LicenseKey' secret or environment variable.");
 if(!XSettings.InstallLicense(abcPdfLicense)) {
 	throw new InvalidOperationException("ABCpdf license failed installation. Please verify that the configured license key is valid.");
 }

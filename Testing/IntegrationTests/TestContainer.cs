@@ -20,7 +20,7 @@ public sealed class TestContainer
 				.SetMinimumLevel(LogLevel.Debug)
 				.AddConsole();
 		});
-			
+		var license = Environment.GetEnvironmentVariable("ABCPDF_LICENSE_KEY");
 		var appDir = Path.Combine(CommonDirectoryPath.GetProjectDirectory().DirectoryPath);
 		var image = new ImageFromDockerfileBuilder()
 			.WithBuildArgument("RESOURCE_REAPER_SESSION_ID", ResourceReaper.DefaultSessionId.ToString("D"))
@@ -47,7 +47,7 @@ public sealed class TestContainer
 			.WithNetwork(network)
 			.WithPortBinding(8080, true)
 			.WithPortBinding(8081, true)
-			.WithEnvironment("ABCPDF_LICENSE_KEY", Environment.GetEnvironmentVariable("ABCPDF_LICENSE_KEY"))
+			.WithEnvironment("ABCPDF_LICENSE_KEY", license)
 			.Build();
 		await _container.StartAsync(cancellationToken).ConfigureAwait(false);
 	}
