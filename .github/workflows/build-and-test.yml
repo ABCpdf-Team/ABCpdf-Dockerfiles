@@ -14,7 +14,7 @@ jobs:
           {dockerfilePath: Ubuntu/24.04/mcr-aspnet-10.0-noble.Dockerfile, tag: abcpdf/mcr-aspnet:10.0}, 
         ]
     env:
-      BASE_IMAGE_RC: ${{ matrix.base_images.tag }}-rc,
+      BASE_IMAGE_RC: ${{ matrix.base_images.tag }}-rc
       ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF_LICENSE_KEY }},
     steps:
     - uses: actions/checkout@v5
