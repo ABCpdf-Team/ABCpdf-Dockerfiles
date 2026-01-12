@@ -20,8 +20,8 @@ jobs:
     - uses: actions/checkout@v5
     - name: Build Base Image
       run: |
-        echo "Building base image: ${BASE_IMAGE_RC}"
-        docker build -f ./${{ matrix.base_images.dockerfilePath }} -t ${BASE_IMAGE_RC} .
+        echo "Building base image: ${{ env.BASE_IMAGE_RC }}"
+        docker build -f ./${{ matrix.base_images.dockerfilePath }} -t  ${{ env.BASE_IMAGE_RC }} .
 
     - name: Setup dotnet
       uses: actions/setup-dotnet@v4
