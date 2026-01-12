@@ -11,17 +11,17 @@ jobs:
     strategy:
       matrix:
         base_images: [ 
-          {dockerfilePath: Runtimes/Ubuntu/24.04/mcr-aspnet-10.0-noble.Dockerfile, rctag:  abcpdf/mcr-aspnet-rc:10.0, tag: abcpdf/mcr-aspnet:10.0}, 
+          {dockerfilePath: Ubuntu/24.04/mcr-aspnet-10.0-noble.Dockerfile, tag: abcpdf/mcr-aspnet:10.0}, 
         ]
     env:
-      BASE_IMAGE_RC: ${{ matrix.base_images.rctag }},
-      ABCPDF_LICENCE_KEY: ${{ secrets.ABCPDF_LICENCE_KEY }},
+      BASE_IMAGE_RC: ${{ matrix.base_images.tag }}-rc,
+      ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF_LICENSE_KEY }},
     steps:
     - uses: actions/checkout@v5
     - name: Build Base Image
       run: |
-        echo "Building base image: ${{ env.BASE_IMAGE_RC }}"
-        docker build -f ./${{ matrix.base_images.dockerfilePath }} -t  ${{ env.BASE_IMAGE_RC }} .
+        echo docker build -f ./Runtimes/${{ matrix.base_images.dockerfilePath }} -t  ${{ env.BASE_IMAGE_RC }} .
+        docker build -f ./Runtimes/${{ matrix.base_images.dockerfilePath }} -t  ${{ env.BASE_IMAGE_RC }} .
 
     - name: Setup dotnet
       uses: actions/setup-dotnet@v4

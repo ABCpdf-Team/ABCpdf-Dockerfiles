@@ -47,7 +47,7 @@ public sealed class TestContainer
 			.WithNetwork(network)
 			.WithPortBinding(8080, true)
 			.WithPortBinding(8081, true)
-			.WithEnvironment("ABCPDF_LICENCE_KEY", Environment.GetEnvironmentVariable("ABCPDF_LICENCE_KEY"))
+			.WithEnvironment("ABCPDF_LICENSE_KEY", Environment.GetEnvironmentVariable("ABCPDF_LICENSE_KEY"))
 			.Build();
 		await _container.StartAsync(cancellationToken).ConfigureAwait(false);
 	}

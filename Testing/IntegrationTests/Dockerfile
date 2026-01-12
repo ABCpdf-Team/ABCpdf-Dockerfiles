@@ -1,6 +1,6 @@
 # These are mandatory arguments
 ARG BASE_IMAGE_RC
-ARG ABCPDF_LICENCE_KEY
+ARG ABCPDF_LICENSE_KEY
 
 FROM ${BASE_IMAGE_RC} AS base
 USER $APP_UID
@@ -54,5 +54,5 @@ COPY --from=publish /app/publish/ABCChrome123 /usr/local/bin/ABCChrome123
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENV ABCPDF_LICENCE_KEY=${ABCPDF_LICENCE_KEY} 
+ENV ABCPDF_LICENSE_KEY=${ABCPDF_LICENSE_KEY} 
 ENTRYPOINT ["dotnet", "TestApplication.dll"]
