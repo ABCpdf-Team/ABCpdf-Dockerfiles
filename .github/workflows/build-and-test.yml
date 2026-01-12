@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         base_images: [ 
-          {dockerfilePath: Runtimes/Ubuntu/24.04/mcr-aspnet-10.0-noble.Dockerfile, rctag:  abcpdf/mcr-aspnet:10.0rc, tag: abcpdf/mcr-aspnet:10.0}, 
+          {dockerfilePath: Runtimes/Ubuntu/24.04/mcr-aspnet-10.0-noble.Dockerfile, rctag:  abcpdf/mcr-aspnet-rc:10.0, tag: abcpdf/mcr-aspnet:10.0}, 
         ]
     env:
       BASE_IMAGE_RC: ${{ matrix.base_images.rctag }},
