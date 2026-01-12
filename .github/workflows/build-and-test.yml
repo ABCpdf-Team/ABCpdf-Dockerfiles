@@ -1,0 +1,35 @@
+name: Test Base Image
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test-base-image:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        base_images: [ 
+          {dockerfilePath: Runtimes/Ubuntu/24.04/mcr-aspnet-10.0-noble.Dockerfile, tag: abcpdf/mcr-aspnet:10.0}, 
+        ]
+    env:
+      BASE_IMAGE_RC: ${{ matrix.base_images.tag }}-rc,
+      ABCPDF_LICENCE_KEY: ${{ secrets.ABCPDF_LICENCE_KEY }},
+    steps:
+    - uses: actions/checkout@v5
+    - name: Build Base Image
+      run: |
+        echo "Building base image: ${BASE_IMAGE_RC}"
+        docker build -f ./${{ matrix.base_images.dockerfilePath }} -t ${BASE_IMAGE_RC}
+
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+    - name: Build and Test Integration Tests
+      working-directory: ./Testing/IntegrationTests
+      run: | 
+        dotnet restore
+        dotnet build --no-restore
+        dotnet test --no-build -v detailed
