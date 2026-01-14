@@ -2,11 +2,11 @@
 ARG BASE_IMAGE_RC
 
 FROM ${BASE_IMAGE_RC} AS base
+RUN echo Using base image: ${BASE_IMAGE_RC}
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
-
 
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
@@ -51,6 +51,7 @@ COPY --from=publish /app/publish/ABCChrome123 /usr/local/bin/ABCChrome123
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
+
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "TestApplication.dll"]

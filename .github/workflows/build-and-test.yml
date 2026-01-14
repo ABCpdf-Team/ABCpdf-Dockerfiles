@@ -13,8 +13,8 @@ jobs:
         dotnet-version: ["10.0"]
     env:
       BASE_IMAGE_TAG: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}
-      BASE_IMAGE_RC: ${BASE_IMAGE_TAG}
-      ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF_LICENSE_KEY }},
+      BASE_IMAGE_RC: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}
+      ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF_LICENSE_KEY }}
     steps:
     - uses: actions/checkout@v5
     - name: Build Base Image
@@ -26,10 +26,10 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '10.0.x'
-    - name: Build and Test Integration Tests
+    - name: Build and Test
       working-directory: ./Testing/IntegrationTests
       run: | 
         dotnet restore
         dotnet build --no-restore
-        dotnet test --no-build
+        dotnet test --no-build -verbosity detailed
      
