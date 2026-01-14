@@ -32,7 +32,7 @@ public sealed class TestContainer
 			.WithLogger(loggerFactory.CreateLogger("ImageFromDockerfileBuilder"))
 			.WithCleanUp(false)
 			.Build();
-		//await image.CreateAsync(cancellationToken).ConfigureAwait(false);
+		await image.CreateAsync(cancellationToken).ConfigureAwait(false);
 		var network = new NetworkBuilder().Build();
 			
 		using IOutputConsumer outputConsumer = Consume.RedirectStdoutAndStderrToConsole();
