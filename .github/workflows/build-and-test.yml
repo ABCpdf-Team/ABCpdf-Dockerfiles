@@ -9,19 +9,18 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        base_images: [ 
-          {dockerfilePath: mcr-aspnet-noble.Dockerfile, tag: abcpdf/mcr-aspnet:10.0}, 
-        ]
+        os: ["noble"]
+        dotnet-version: ["10.0"]
     env:
-      BASE_IMAGE_RC: ${{ matrix.base_images.tag }}-rc
-      DOTNET_VERSION: 10.0
+      BASE_IMAGE_TAG: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}
+      BASE_IMAGE_RC: ${BASE_IMAGE_TAG}
       ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF_LICENSE_KEY }},
     steps:
     - uses: actions/checkout@v5
     - name: Build Base Image
       run: |
-        echo docker build -f ./Runtimes/${{ matrix.base_images.dockerfilePath }} -t  ${{ env.BASE_IMAGE_RC }} .
-        docker build -f ./Runtimes/${{ matrix.base_images.dockerfilePath }} -t  ${{ env.BASE_IMAGE_RC }} . --build-arg DOTNET_VERSION=${{ env.DOTNET_VERSION }}
+        echo docker build -f ./Runtimes/mcr-aspnet-${{ matrix.os }}.Dockerfile -t  ${{ env.BASE_IMAGE_RC }} --build-arg DOTNET_VERSION=${{ matrix.dotnet-version }} .
+        docker build -f ./Runtimes/mcr-aspnet-${{ matrix.os }}.Dockerfile -t  ${{ env.BASE_IMAGE_RC }} --build-arg DOTNET_VERSION=${{ matrix.dotnet-version }} .
 
     - name: Setup dotnet
       uses: actions/setup-dotnet@v4
