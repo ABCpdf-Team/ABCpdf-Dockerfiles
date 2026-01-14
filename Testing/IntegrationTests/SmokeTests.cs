@@ -1,5 +1,4 @@
-﻿using DotNet.Testcontainers.Builders;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 
 namespace IntegrationTests;
 
@@ -17,14 +16,13 @@ public class SmokeTests : IClassFixture<TestContainer> {
 	public async Task Should_render_simple_html_file_correctly()
 	{
 		// Arrange
-		var testfilename = "simple.html";
-		var filePath = Path.Combine(_testContainer.GetTestFilesFolder(), testfilename);
+		var uri = _testContainer.ConstructUri("htmlfiletopdf");
+		var testFilename = "simple.html";
+		var filePath = Path.Combine(_testContainer.GetTestFilesFolder(), testFilename);
 		using var form = new MultipartFormDataContent();
 		using var fileContent = new ByteArrayContent(await File.ReadAllBytesAsync(filePath));
 		fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("text/html");
-		form.Add(fileContent, "htmlFile", testfilename);
-
-		var uri = _testContainer.ConstructUri("htmlfiletopdf");
+		form.Add(fileContent, "htmlFile", testFilename);
 		using var httpClient = new HttpClient();
 
 		// Act

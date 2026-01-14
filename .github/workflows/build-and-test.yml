@@ -2,7 +2,6 @@ name: Test Base Image
 
 on:
   push:
-#  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -11,7 +10,7 @@ jobs:
     strategy:
       matrix:
         base_images: [ 
-          {dockerfilePath: Ubuntu/24.04/mcr-aspnet-10.0-noble.Dockerfile, tag: abcpdf/mcr-aspnet:10.0}, 
+          {dockerfilePath: mcr-aspnet-noble.Dockerfile, tag: abcpdf/mcr-aspnet:10.0}, 
         ]
     env:
       BASE_IMAGE_RC: ${{ matrix.base_images.tag }}-rc
@@ -19,6 +18,8 @@ jobs:
     steps:
     - uses: actions/checkout@v5
     - name: Build Base Image
+      env:
+        DOTNET_VERSION: 10.0
       run: |
         echo docker build -f ./Runtimes/${{ matrix.base_images.dockerfilePath }} -t  ${{ env.BASE_IMAGE_RC }} .
         docker build -f ./Runtimes/${{ matrix.base_images.dockerfilePath }} -t  ${{ env.BASE_IMAGE_RC }} .
@@ -32,5 +33,5 @@ jobs:
       run: | 
         dotnet restore
         dotnet build --no-restore
-        dotnet test --no-build -v detailed
+        dotnet test --no-build
      

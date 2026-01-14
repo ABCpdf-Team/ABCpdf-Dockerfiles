@@ -32,7 +32,6 @@ app.MapPost("htmlfiletopdf", async (IFormFile htmlFile) =>
 	if (htmlFile.Length <= 0) return Results.BadRequest("No file uploaded.");
 	using Doc doc = new();
 	doc.AddImageHtml(await new StreamReader(htmlFile.OpenReadStream()).ReadToEndAsync());
-	// For now, just return a placeholder response
 	return Results.File(doc.GetData(), contentType: "application/pdf", fileDownloadName: $"{htmlFile.FileName}.pdf");
 })
 .WithName("HtmlFileToPdf")

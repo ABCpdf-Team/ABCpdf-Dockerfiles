@@ -13,14 +13,28 @@ on:
   workflow_dispatch:
 
 jobs:
-  push_to_registry:
-    name: Push Docker image to Docker Hub
+  build-and-push-docker-image:
     runs-on: ubuntu-latest
     permissions:
       packages: write
       contents: read
       attestations: write
       id-token: write
+    strategy:
+      matrix:
+        os: ["noble", "jammy", "bookworm-slim"]
+        dotnet-version: ["10.0", "8.0"]
+        exclude:
+          - os: "jammy" # .NET 10.0 is not supported on Ubuntu 22.04
+            dotnet-version: "10.0"
+          - os: "bookworm-slim" # .NET 10.0 is not supported on debian bookworm
+            dotnet-version: "10.0"
+          - os: "bookworm-slim"
+          - os : "jammy"
+          - os: "noble" # .NET 8.0 is not supported on noble
+        include:
+          - os: "noble"
+            dotnet-version: "10.0"
     steps:
       - name: Check out the repo
         uses: actions/checkout@v5
@@ -30,7 +44,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
@@ -42,11 +55,12 @@ jobs:
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
           context: .
-          file: ./Runtimes/Ubuntu/24.04/mcr-aspnet-10.0-noble.Dockerfile
-          push: true
+          file: ./Runtimes/mcr-aspnet-${{ matrix.os }}.Dockerfile
+          build-args: |
+            DOTNET_VERSION=${{ matrix.dotnet-version }}
+          push: false
           tags: |
-            abcpdf/mcr-aspnet:10.0
-            abcpdf/mcr-aspnet:10.0-noble
+            abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Generate artifact attestation
