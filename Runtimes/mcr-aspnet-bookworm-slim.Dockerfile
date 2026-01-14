@@ -1,4 +1,4 @@
-ARG DOTNET_VERSION
+ARG DOTNET_VERSION=99.0 # Default to an invalid version to force the user to set it
 FROM mcr.microsoft.com/dotnet/aspnet:${DOTNET_VERSION}-bookworm-slim
 RUN apt-get update \
     && apt-get upgrade -y \

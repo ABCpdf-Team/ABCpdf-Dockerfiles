@@ -14,15 +14,14 @@ jobs:
         ]
     env:
       BASE_IMAGE_RC: ${{ matrix.base_images.tag }}-rc
+      DOTNET_VERSION: 10.0
       ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF_LICENSE_KEY }},
     steps:
     - uses: actions/checkout@v5
     - name: Build Base Image
-      env:
-        DOTNET_VERSION: 10.0
       run: |
         echo docker build -f ./Runtimes/${{ matrix.base_images.dockerfilePath }} -t  ${{ env.BASE_IMAGE_RC }} .
-        docker build -f ./Runtimes/${{ matrix.base_images.dockerfilePath }} -t  ${{ env.BASE_IMAGE_RC }} .
+        docker build -f ./Runtimes/${{ matrix.base_images.dockerfilePath }} -t  ${{ env.BASE_IMAGE_RC }} . --build-arg DOTNET_VERSION=${{ env.DOTNET_VERSION }}
 
     - name: Setup dotnet
       uses: actions/setup-dotnet@v4
