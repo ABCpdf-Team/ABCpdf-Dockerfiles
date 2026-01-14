@@ -2,26 +2,21 @@ using WebSupergoo.ABCpdf13;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Set the license from dotnet secrets
-
-
-
+// Set the ABCpdf license from dotnet secrets
 var abcPdfLicense = builder.Configuration["ABCPDF_LICENSE_KEY"] ??
-	throw new InvalidOperationException("ABCpdf license key is not configured. Please configure the 'ABCpdf:LicenseKey' secret or environment variable.");
+	throw new InvalidOperationException("ABCpdf license key is not configured. Please set the license key in the 'ABCPDF_LICENSE_KEY' environment variable or user-secret.");
 if(!XSettings.InstallLicense(abcPdfLicense)) {
 	throw new InvalidOperationException("ABCpdf license failed installation. Please verify that the configured license key is valid.");
 }
 builder.Services.AddHealthChecks();
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+// Add container health checks
 app.MapHealthChecks("/healthz");
 
-// Configure the HTTP request pipeline.
 if(app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -32,17 +27,17 @@ if(app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/htmltopdf", (string htmlOrUrl) =>
+app.MapPost("htmlfiletopdf", async (IFormFile htmlFile) =>
 {
+	if (htmlFile.Length <= 0) return Results.BadRequest("No file uploaded.");
 	using Doc doc = new();
-	if(htmlOrUrl.StartsWith("http"))
-		doc.AddImageUrl(htmlOrUrl);
-	else
-		doc.AddImageHtml(htmlOrUrl);
-	return Results.File(doc.GetData(), contentType: "application/pdf", fileDownloadName: "mypage.pdf");
+	doc.AddImageHtml(await new StreamReader(htmlFile.OpenReadStream()).ReadToEndAsync());
+	// For now, just return a placeholder response
+	return Results.File(doc.GetData(), contentType: "application/pdf", fileDownloadName: $"{htmlFile.FileName}.pdf");
 })
-.WithName("ConvertToHtml")
-.WithDescription("Renders the submitted HTML or URL into a PDF file.")
-.Produces<byte[]>(StatusCodes.Status200OK, "application/pdf");
+.WithName("HtmlFileToPdf")
+.WithDescription("Renders the submitted HTML file to a pdf file.")
+.Produces<byte[]>(StatusCodes.Status200OK, "application/pdf")
+.DisableAntiforgery();
 
 app.Run();

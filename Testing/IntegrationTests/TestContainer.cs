@@ -8,7 +8,7 @@ namespace IntegrationTests;
 public sealed class TestContainer
 {
 
-	private const string ImageName = "abcpdf-api-testcontainer";
+	private const string ImageName = "abcpdf-testcontainer";
 	private IContainer? _container;
 		
 	public async Task StartAsync(CancellationToken cancellationToken = default)
@@ -30,9 +30,9 @@ public sealed class TestContainer
 			.WithContextDirectory(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath)
 			.WithName(ImageName)
 			.WithLogger(loggerFactory.CreateLogger("ImageFromDockerfileBuilder"))
+			.WithCleanUp(false)
 			.Build();
-
-		await image.CreateAsync(cancellationToken).ConfigureAwait(false);
+		//await image.CreateAsync(cancellationToken).ConfigureAwait(false);
 		var network = new NetworkBuilder().Build();
 			
 		using IOutputConsumer outputConsumer = Consume.RedirectStdoutAndStderrToConsole();
@@ -58,4 +58,6 @@ public sealed class TestContainer
 				Uri.UriSchemeHttp, _container.Hostname, _container.GetMappedPublicPort(8080), subPath).Uri;
 		throw new InvalidOperationException("_container is not initialized");
 	}
+
+	public string GetTestFilesFolder() => Path.Combine(CommonDirectoryPath.GetSolutionDirectory().DirectoryPath, "TestFiles");
 }
