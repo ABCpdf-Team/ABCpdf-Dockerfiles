@@ -9,11 +9,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: ["noble"]
-        dotnet-version: ["10.0"]
+        os: ["noble", "jammy", "bookworm-slim"]
+        dotnet-version: ["8.0", "10.0"]
+        exclude:
+          - os: "jammy" # .NET 10.0 is not supported on Ubuntu 22.04
+            dotnet-version: "10.0"
+          - os: "bookworm-slim" # .NET 10.0 is not supported on debian bookworm
+            dotnet-version: "10.0"
+          - os: "bookworm-slim"
     env:
       BASE_IMAGE_TAG: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}
-      BASE_IMAGE_RC: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}
+      BASE_IMAGE_RC: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}-${{ github.sha }}
       ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF_LICENSE_KEY }}
     steps:
     - uses: actions/checkout@v5
