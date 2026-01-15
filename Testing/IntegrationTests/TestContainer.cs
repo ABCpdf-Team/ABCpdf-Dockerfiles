@@ -12,16 +12,14 @@ public sealed class TestContainer
 	private readonly string _baseImageRc = GetEnvVar("BASE_IMAGE_RC");
 	private readonly string _abcpdfLicense = GetEnvVar("ABCPDF_LICENSE_KEY");
 	private readonly string _dotnetVersion = GetEnvVar("DOTNET_VERSION");
-	private IFutureDockerImage _image;
 	private IContainer? _container;
 
 	public async Task StartAsync(CancellationToken cancellationToken = default)
 	{
-		await BuildAsync(cancellationToken);
-
+		var image = await BuildAsync(cancellationToken);
 		using var outputConsumer = Consume.RedirectStdoutAndStderrToConsole();
 
-		_container = new ContainerBuilder(_image.FullName)
+		_container = new ContainerBuilder(image.FullName)
 			.WithName("abcpdf_test_app_container")
 			.WithOutputConsumer(outputConsumer)
 			.WithWaitStrategy(
@@ -43,7 +41,7 @@ public sealed class TestContainer
 		}
 	}
 
-	private async Task BuildAsync(CancellationToken cancellationToken)
+	private async Task<IFutureDockerImage> BuildAsync(CancellationToken cancellationToken)
 	{
 		var loggerFactory = LoggerFactory.Create(builder =>
 		{
@@ -55,7 +53,7 @@ public sealed class TestContainer
 		var imageName = $"abcpdf-testcontainer{_dotnetVersion}";
 
 		var appDir = Path.Combine(CommonDirectoryPath.GetProjectDirectory().DirectoryPath);
-		_image = new ImageFromDockerfileBuilder()
+		var image = new ImageFromDockerfileBuilder()
 			.WithBuildArgument("RESOURCE_REAPER_SESSION_ID", ResourceReaper.DefaultSessionId.ToString("D"))
 			.WithBuildArgument("TARGET_FRAMEWORK", $"net{_dotnetVersion}")
 			.WithBuildArgument("BASE_IMAGE_RC", _baseImageRc)
@@ -66,7 +64,8 @@ public sealed class TestContainer
 			.WithLogger(loggerFactory.CreateLogger("ImageFromDockerfileBuilder"))
 			.WithCleanUp(false)
 			.Build();
-		await _image.CreateAsync(cancellationToken).ConfigureAwait(false);
+		await image.CreateAsync(cancellationToken).ConfigureAwait(false);
+		return image;
 	}
 
 	public Uri ConstructUri(string subPath)
