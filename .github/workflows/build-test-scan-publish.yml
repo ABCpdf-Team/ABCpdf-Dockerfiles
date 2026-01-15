@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-scanbase-images:
+  build-and-scan-base-images:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -63,7 +63,7 @@ jobs:
 
   publish-scan-reports:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: build-and-scanbase-images
+    needs: build-and-scan-base-images
     runs-on: ubuntu-latest
     permissions:
       pages: write
@@ -102,7 +102,7 @@ jobs:
       uses: actions/deploy-pages@v4
 
   test-and-push-base-image:
-    needs: test-base-image
+    needs: build-and-scan-base-images
     runs-on: ubuntu-latest
     strategy:
       matrix:
