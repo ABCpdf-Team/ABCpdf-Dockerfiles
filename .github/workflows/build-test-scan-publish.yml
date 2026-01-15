@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  test-base-image:
+  build-and-scanbase-images:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -63,7 +63,7 @@ jobs:
 
   publish-scan-reports:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: test-base-image
+    needs: build-and-scanbase-images
     runs-on: ubuntu-latest
     permissions:
       pages: write
@@ -115,6 +115,9 @@ jobs:
       DOTNET_VERSION: ${{ matrix.dotnet-version }}
       BASE_IMAGE_RC: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}-${{ github.sha }}
       PUBLISH_IMAGE_TAG: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}
+      LATEST_VERSION_OS: noble
+      LATEST_DOTNET_VERSION: 10.0
+      LATEST_VERSION_TAG: abcpdf/mcr-aspnet:10-noble
       ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF_LICENSE_KEY }}
     steps:
     - uses: actions/checkout@v5
@@ -148,7 +151,14 @@ jobs:
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
     - name: Tag and push image to Docker Hub
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      if: github.event_name == 'push'
       run: |
         docker tag ${{ env.BASE_IMAGE_RC }} ${{ env.PUBLISH_IMAGE_TAG }}
+      
         docker push ${{ env.PUBLISH_IMAGE_TAG }}
+
+    - name: Tag and push latest version tag (noble only)
+      if: github.event_name == 'push' && matrix.os == env.LATEST_VERSION_OS && matrix['dotnet-version'] == env.LATEST_DOTNET_VERSION
+      run: |
+        docker tag ${{ env.BASE_IMAGE_RC }} ${{ env.LATEST_VERSION_TAG }}
+        docker push ${{ env.LATEST_VERSION_TAG }}

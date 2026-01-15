@@ -48,6 +48,7 @@ RUN apt-get update \
     libxrandr2 \
     libxrender1 \
     libegl1 \
+    curl \
 # Install a reasonable set of fonts
     fonts-noto-core \
     fonts-noto-mono \
