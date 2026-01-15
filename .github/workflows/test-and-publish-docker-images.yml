@@ -1,0 +1,49 @@
+name: Build, Test and Publish ABCpdf Images
+
+on:
+#  push:
+#    branches:
+#      - main
+#  pull_request:
+#  schedule:
+#    - cron: '0 3 * * 2'  # 4am UK time on Tuesdays (3am UTC for BST, 4am UTC would be 5am BST)
+   workflow_dispatch:
+
+jobs:
+  build-base-images:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+#          - os: "jammy"
+#            dotnet-version: "8.0"
+          - os: "bookworm-slim"
+            dotnet-version: "8.0"
+#          - os: "noble"
+#            dotnet-version: "10.0"
+    env:
+      DOTNET_VERSION: ${{ matrix.dotnet-version }}
+      BASE_IMAGE_TAG: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}-${{ github.sha }}
+      TEST_APP_IMAGE_TAG: abcpdf_test_app_container:${{ matrix.dotnet-version }}-${{ matrix.os }}
+      PUBLISH_IMAGE_TAG: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}
+      ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF_LICENSE_KEY }}
+    steps:
+    - uses: actions/checkout@v5
+    - name: Build Base Image
+      run: |
+        docker build -f ./Runtimes/mcr-aspnet-${{ matrix.os }}.Dockerfile -t  ${{ env.BASE_IMAGE_TAG }} --build-arg DOTNET_VERSION=${{ matrix.dotnet-version }} .
+      
+    - name: Build Test Application Image
+      working-directory: ./Testing
+      run: |
+        docker build -f ./IntegrationTests/Dockerfile --build-arg BASE_IMAGE=${{ env.BASE_IMAGE_TAG }} \
+          --build-arg TARGET_FRAMEWORK=${{ matrix.dotnet-version }} \
+          --tag abcpdf_test_app_container:${{ matrix.dotnet-version }}-jammy .
+
+    - name: Run Application Tests Against Base Image
+      working-directory: ./Testing/IntegrationTests
+      run: |
+        dotnet restore
+        dotnet build --no-restore
+        dotnet test --no-build
+        
