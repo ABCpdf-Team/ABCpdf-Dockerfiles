@@ -16,7 +16,6 @@ jobs:
             dotnet-version: "10.0"
           - os: "bookworm-slim" # .NET 10.0 is not supported on debian bookworm
             dotnet-version: "10.0"
-          - os: "bookworm-slim"
     env:
       BASE_IMAGE_TAG: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}
       BASE_IMAGE_RC: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}-${{ github.sha }}
@@ -32,7 +31,7 @@ jobs:
     - name: Setup dotnet
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '10.0.x'
+        dotnet-version: '${{ matrix.dotnet-version }}.x'
     - name: Build and Test
       working-directory: ./Testing/IntegrationTests
       run: | 
