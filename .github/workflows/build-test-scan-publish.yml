@@ -28,14 +28,27 @@ jobs:
         echo docker build -f ./Runtimes/mcr-aspnet-${{ matrix.os }}.Dockerfile -t  ${{ env.BASE_IMAGE_RC }} --build-arg DOTNET_VERSION=${{ matrix.dotnet-version }} .
         docker build -f ./Runtimes/mcr-aspnet-${{ matrix.os }}.Dockerfile -t  ${{ env.BASE_IMAGE_RC }} --build-arg DOTNET_VERSION=${{ matrix.dotnet-version }} .
 
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ env.BASE_IMAGE_RC }}
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results
+      uses: actions/upload-artifact@v4
+      with:
+        name: trivy-scan-${{ matrix.dotnet-version }}-${{ matrix.os }}
+        path: trivy-results.sarif
+
     - name: Setup dotnet
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '10.0.x' # NB test project is currently dotnet 10. Matrix version is for base image version only
-    - name: Build and Test
+    - name: Test application in container
       working-directory: ./Testing/IntegrationTests
       run: | 
         dotnet restore
         dotnet build --no-restore
-        dotnet test --no-build -verbosity detailed
+        dotnet test --no-build
      
