@@ -101,7 +101,7 @@ jobs:
       id: deployment
       uses: actions/deploy-pages@v4
 
-  run-integration-tests:
+  test-and-push-base-image:
     needs: test-base-image
     runs-on: ubuntu-latest
     strategy:
@@ -114,6 +114,7 @@ jobs:
     env:
       DOTNET_VERSION: ${{ matrix.dotnet-version }}
       BASE_IMAGE_RC: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}-${{ github.sha }}
+      PUBLISH_IMAGE_TAG: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}
       ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF_LICENSE_KEY }}
     steps:
     - uses: actions/checkout@v5
@@ -138,3 +139,16 @@ jobs:
         dotnet restore
         dotnet build --no-restore
         dotnet test --no-build
+
+    - name: Log in to Docker Hub
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+    - name: Tag and push image to Docker Hub
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: |
+        docker tag ${{ env.BASE_IMAGE_RC }} ${{ env.PUBLISH_IMAGE_TAG }}
+        docker push ${{ env.PUBLISH_IMAGE_TAG }}
