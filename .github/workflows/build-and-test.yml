@@ -7,11 +7,10 @@ on:
 jobs:
   test-base-image:
     runs-on: ubuntu-latest
-    continue-on-error: true
     strategy:
       matrix:
         os: ["noble", "jammy", "bookworm-slim"]
-        dotnet-version: ["10.0"]
+        dotnet-version: ["8.0", "9.0", "10.0"]
         exclude:
           - os: "jammy" # .NET 10.0 is not supported on Ubuntu 22.04
             dotnet-version: "10.0"
