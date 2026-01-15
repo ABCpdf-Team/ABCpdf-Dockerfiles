@@ -151,14 +151,14 @@ jobs:
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
     - name: Tag and push image to Docker Hub
-      if: github.event_name == 'push'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       run: |
         docker tag ${{ env.BASE_IMAGE_RC }} ${{ env.PUBLISH_IMAGE_TAG }}
       
         docker push ${{ env.PUBLISH_IMAGE_TAG }}
 
     - name: Tag and push latest version tag (noble only)
-      if: github.event_name == 'push' && matrix.os == env.LATEST_VERSION_OS && matrix['dotnet-version'] == env.LATEST_DOTNET_VERSION
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.os == env.LATEST_VERSION_OS && matrix['dotnet-version'] == env.LATEST_DOTNET_VERSION
       run: |
         docker tag ${{ env.BASE_IMAGE_RC }} ${{ env.LATEST_VERSION_TAG }}
         docker push ${{ env.LATEST_VERSION_TAG }}
