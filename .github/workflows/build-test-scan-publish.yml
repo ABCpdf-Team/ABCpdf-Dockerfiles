@@ -2,6 +2,7 @@ name: Build, Test and Publish ABCpdf Images
 
 on:
   push:
+  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -47,16 +48,16 @@ jobs:
         name: scan-report-${{ matrix.dotnet-version }}-${{ matrix.os }}
         path: scan-reports/
 
-    - name: Setup dotnet
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '10.0.x' # NB test project is currently dotnet 10. Matrix version is for base image version only
-    - name: Test application in container
-      working-directory: ./Testing/IntegrationTests
+    - name: Save Docker image
       run: |
-        dotnet restore
-        dotnet build --no-restore
-        dotnet test --no-build
+        docker save ${{ env.BASE_IMAGE_RC }} -o base-image.tar
+
+    - name: Upload Docker image artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: docker-image-${{ matrix.dotnet-version }}-${{ matrix.os }}
+        path: base-image.tar
+        retention-days: 1
 
   publish-scan-reports:
     needs: test-base-image
@@ -64,6 +65,7 @@ jobs:
     permissions:
       pages: write
       id-token: write
+      pull-requests: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -96,3 +98,70 @@ jobs:
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
+
+    - name: Comment on PR with scan report links
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const pageUrl = '${{ steps.deployment.outputs.page_url }}';
+
+          // Get list of report files
+          const files = fs.readdirSync('scan-reports').filter(f => f.endsWith('.html') && f !== 'index.html');
+
+          let body = '## 🔍 Trivy Vulnerability Scan Reports\n\n';
+          body += '| Image | Report |\n';
+          body += '|-------|--------|\n';
+
+          for (const file of files) {
+            const name = file.replace('.html', '');
+            body += `| ${name} | [View Report](${pageUrl}${file}) |\n`;
+          }
+
+          body += `\n[View All Reports](${pageUrl})`;
+
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: body
+          });
+
+  run-integration-tests:
+    needs: publish-scan-reports
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: "jammy"
+            dotnet-version: "8.0"
+          - os: "noble"
+            dotnet-version: "10.0"
+    env:
+      DOTNET_VERSION: ${{ matrix.dotnet-version }}
+      BASE_IMAGE_RC: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}-${{ github.sha }}
+      ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF_LICENSE_KEY }}
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Download Docker image artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: docker-image-${{ matrix.dotnet-version }}-${{ matrix.os }}
+
+    - name: Load Docker image
+      run: |
+        docker load -i base-image.tar
+
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Run integration tests
+      working-directory: ./Testing/IntegrationTests
+      run: |
+        dotnet restore
+        dotnet build --no-restore
+        dotnet test --no-build
