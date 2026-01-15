@@ -33,7 +33,7 @@ jobs:
       with:
         image-ref: ${{ env.BASE_IMAGE_RC }}
         format: 'template'
-        template: '@/contrib/html.tpl'
+        template: '@.github/trivy/html.tpl'
         output: 'trivy-results.html'
 
     - name: Prepare scan report for pages
