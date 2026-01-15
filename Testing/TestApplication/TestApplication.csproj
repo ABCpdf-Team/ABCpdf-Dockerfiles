@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>e9123c5a-e0dd-4fd5-a93d-f3dc4dc0284b</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileFastModeStage>debug</DockerfileFastModeStage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ABCpdf" Version="13.4.0" />
+    <PackageReference Include="ABCpdf.ABCChrome123.Linux" Version="13.4.0" />
+  </ItemGroup>
+
+</Project>
