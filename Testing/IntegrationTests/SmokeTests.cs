@@ -33,6 +33,4 @@ public class SmokeTests : IClassFixture<TestContainer> {
 		Assert.True(response.Content.Headers.ContentType?.MediaType == "application/pdf");
 		Assert.True(response.Content.Headers.ContentLength > 0);
 	}
-	
-	
 }

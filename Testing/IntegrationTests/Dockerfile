@@ -11,18 +11,20 @@ EXPOSE 8081
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG RESOURCE_REAPER_SESSION_ID="00000000-0000-0000-0000-000000000000"
+ARG TARGET_FRAMEWORK
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["TestApplication/TestApplication.csproj", "TestApplication/"]
-RUN dotnet restore "./TestApplication/TestApplication.csproj"
+RUN dotnet restore "./TestApplication/TestApplication.csproj"  /p:TargetFramework=${TARGET_FRAMEWORK}
 COPY . .
 WORKDIR "/src/TestApplication"
-RUN dotnet build "./TestApplication.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./TestApplication.csproj" -c $BUILD_CONFIGURATION -o /app/build  /p:TargetFramework=${TARGET_FRAMEWORK}
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
+ARG TARGET_FRAMEWORK
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./TestApplication.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./TestApplication.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false /p:TargetFramework=${TARGET_FRAMEWORK}
 # This is required to ensure ABCChrome can be launched by user "app" in production
 RUN chmod o+x /app/publish/ABCChrome123/ABCChrome123
 

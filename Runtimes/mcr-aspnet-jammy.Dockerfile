@@ -1,7 +1,7 @@
 ARG DOTNET_VERSION=99.0 # Default to an invalid version to force the user to set it
 FROM mcr.microsoft.com/dotnet/aspnet:${DOTNET_VERSION}-jammy
 RUN apt-get update \
-    apt--get upgrade -y \
+    && apt--get upgrade -y \
     &&apt-get install -y \
     ca-certificates \
     libasound2 \

@@ -8,22 +8,11 @@ var abcPdfLicense = builder.Configuration["ABCPDF_LICENSE_KEY"] ??
 if(!XSettings.InstallLicense(abcPdfLicense)) {
 	throw new InvalidOperationException("ABCpdf license failed installation. Please verify that the configured license key is valid.");
 }
+
 builder.Services.AddHealthChecks();
 
-builder.Services.AddOpenApi();
-
 var app = builder.Build();
-
-// Add container health checks
 app.MapHealthChecks("/healthz");
-
-if(app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.UseSwaggerUI(options => {
-	    options.SwaggerEndpoint("/openapi/v1.json", "v1");
-    });
-}
 
 app.UseHttpsRedirection();
 
