@@ -21,6 +21,7 @@ jobs:
     env:
       BASE_IMAGE_TAG: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}
       BASE_IMAGE_RC: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}-${{ github.sha }}
+      DOTNET_VERSION: ${{ matrix.dotnet-version }}
       ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF_LICENSE_KEY }}
     steps:
     - uses: actions/checkout@v5
