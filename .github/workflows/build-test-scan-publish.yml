@@ -29,17 +29,23 @@ jobs:
         docker build -f ./Runtimes/mcr-aspnet-${{ matrix.os }}.Dockerfile -t  ${{ env.BASE_IMAGE_RC }} --build-arg DOTNET_VERSION=${{ matrix.dotnet-version }} .
 
     - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
+      uses: aquasecurity/trivy-action@0.28.0
       with:
         image-ref: ${{ env.BASE_IMAGE_RC }}
-        format: 'sarif'
-        output: 'trivy-results.sarif'
+        format: 'template'
+        template: '@/contrib/html.tpl'
+        output: 'trivy-results.html'
 
-    - name: Upload Trivy scan results
+    - name: Prepare scan report for pages
+      run: |
+        mkdir -p scan-reports
+        cp trivy-results.html scan-reports/${{ matrix.dotnet-version }}-${{ matrix.os }}.html
+
+    - name: Upload scan report for pages
       uses: actions/upload-artifact@v4
       with:
-        name: trivy-scan-${{ matrix.dotnet-version }}-${{ matrix.os }}
-        path: trivy-results.sarif
+        name: scan-report-${{ matrix.dotnet-version }}-${{ matrix.os }}
+        path: scan-reports/
 
     - name: Setup dotnet
       uses: actions/setup-dotnet@v4
@@ -47,8 +53,46 @@ jobs:
         dotnet-version: '10.0.x' # NB test project is currently dotnet 10. Matrix version is for base image version only
     - name: Test application in container
       working-directory: ./Testing/IntegrationTests
-      run: | 
+      run: |
         dotnet restore
         dotnet build --no-restore
         dotnet test --no-build
-     
+
+  publish-scan-reports:
+    needs: test-base-image
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+    - name: Download all scan reports
+      uses: actions/download-artifact@v4
+      with:
+        pattern: scan-report-*
+        path: scan-reports/
+        merge-multiple: true
+
+    - name: Create index page
+      run: |
+        cd scan-reports
+        echo '<!DOCTYPE html><html><head><title>Trivy Scan Reports</title></head><body>' > index.html
+        echo '<h1>ABCpdf Docker Image Vulnerability Scan Reports</h1><ul>' >> index.html
+        for f in *.html; do
+          [ "$f" != "index.html" ] && echo "<li><a href=\"$f\">$f</a></li>" >> index.html
+        done
+        echo '</ul></body></html>' >> index.html
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+
+    - name: Upload to Pages
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: scan-reports/
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
