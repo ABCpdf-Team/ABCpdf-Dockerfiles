@@ -15,12 +15,22 @@ jobs:
     strategy:
       matrix:
         include:
-#          - os: "jammy"
-#            dotnet-version: "8.0"
           - os: "bookworm-slim"
+            dotnet-version: "6.0"
+          - os: "bookworm-slim"
+            dotnet-version: "7.0"
+          - os: "bookworm-slim"
+            dotnet-version: "8.0"            
+          - os: "bookworm-slim"
+            dotnet-version: "8.0"            
+          - os: "jammy"
+            dotnet-version: "6.0"
+          - os: "jammy"
+            dotnet-version: "7.0"
+          - os: "jammy"
             dotnet-version: "8.0"
-#          - os: "noble"
-#            dotnet-version: "10.0"
+          - os: "noble"
+            dotnet-version: "10.0"
     env:
       DOTNET_VERSION: ${{ matrix.dotnet-version }}
       BASE_IMAGE_TAG: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}-${{ github.sha }}
@@ -78,7 +88,6 @@ jobs:
         docker push ${{ env.PUBLISH_IMAGE_TAG }}
 
   publish-scan-reports:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build-test-publishbase-images
     runs-on: ubuntu-latest
     permissions:
