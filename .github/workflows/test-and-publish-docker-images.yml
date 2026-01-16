@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-test-publishbase-images:
+  build-test-publish-base-images:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -78,7 +78,7 @@ jobs:
         docker push ${{ env.PUBLISH_IMAGE_TAG }}
 
   publish-scan-reports:
-    needs: build-test-publishbase-images
+    needs: build-test-publish-base-images
     runs-on: ubuntu-latest
     permissions:
       pages: write
