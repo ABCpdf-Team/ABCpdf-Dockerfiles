@@ -11,9 +11,7 @@ public sealed class TestContainer
 	public async Task StartAsync(CancellationToken cancellationToken = default)
 	{
 		using var outputConsumer = Consume.RedirectStdoutAndStderrToConsole();
-		throw new Exception(GetEnvVar("TEST_APP_IMAGE_TAG"));
 		_container = new ContainerBuilder(GetEnvVar("TEST_APP_IMAGE_TAG"))
-			.WithName("abcpdf_test_app_container")
 			.WithOutputConsumer(outputConsumer)
 			.WithWaitStrategy(
 				Wait.ForUnixContainer()
