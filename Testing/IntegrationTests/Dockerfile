@@ -1,5 +1,5 @@
 # These are mandatory arguments
-ARG BASE_IMAGE
+ARG BASE_IMAGE=invalid:please-set
 
 FROM ${BASE_IMAGE} AS base
 USER $APP_UID

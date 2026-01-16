@@ -36,7 +36,7 @@ jobs:
     - name: Build Test Application Image
       working-directory: ./Testing
       run: |
-        docker build -f ./IntegrationTests/Dockerfile --build-arg BASE_IMAGE=${{ env.BASE_IMAGE_TAG }} -build-arg TARGET_FRAMEWORK=net${{ matrix.dotnet-version }} --tag ${{ env.TEST_APP_IMAGE_TAG }} .
+        docker build -f ./IntegrationTests/Dockerfile --build-arg BASE_IMAGE=${{ env.BASE_IMAGE_TAG }} --build-arg TARGET_FRAMEWORK=net${{ matrix.dotnet-version }} --tag ${{ env.TEST_APP_IMAGE_TAG }} .
 
     - name: Run Application Tests Against Base Image
       working-directory: ./Testing/IntegrationTests
