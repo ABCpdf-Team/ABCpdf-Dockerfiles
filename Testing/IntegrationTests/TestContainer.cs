@@ -9,7 +9,7 @@ public sealed class TestContainer
 {
 	// This is the image tag of the abcpdf runtime docker image under test: e.g. " abcpdf/mcr-aspnet:10.0"
 	// It is expected to be set as an environment variable in the test runner environment.
-	private readonly string _baseImageRc = GetEnvVar("BASE_IMAGE_RC");
+	private readonly string _baseImageRc = GetEnvVar("BASE_IMAGE_TAG");
 	private readonly string _abcpdfLicense = GetEnvVar("ABCPDF_LICENSE_KEY");
 	private readonly string _dotnetVersion = GetEnvVar("DOTNET_VERSION");
 	private IContainer? _container;
