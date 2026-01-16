@@ -2,7 +2,6 @@
 ARG BASE_IMAGE
 
 FROM ${BASE_IMAGE} AS base
-RUN echo Using base image: ${BASE_IMAGE_RC}
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
