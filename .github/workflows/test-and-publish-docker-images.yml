@@ -38,7 +38,7 @@ jobs:
       run: |
         docker build -f ./IntegrationTests/Dockerfile --build-arg BASE_IMAGE=${{ env.BASE_IMAGE_TAG }} \
           --build-arg TARGET_FRAMEWORK=net${{ matrix.dotnet-version }} \
-          --tag abcpdf_test_app_container:${{ matrix.dotnet-version }}-jammy .
+          --tag ${{ env.TEST_APP_IMAGE_TAG }} .
 
     - name: Run Application Tests Against Base Image
       working-directory: ./Testing/IntegrationTests
