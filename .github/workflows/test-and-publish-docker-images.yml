@@ -10,7 +10,7 @@ on:
    workflow_dispatch:
 
 jobs:
-  build-base-images:
+  build-test-publishbase-images:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -36,9 +36,7 @@ jobs:
     - name: Build Test Application Image
       working-directory: ./Testing
       run: |
-        docker build -f ./IntegrationTests/Dockerfile --build-arg BASE_IMAGE=${{ env.BASE_IMAGE_TAG }} \
-          --build-arg TARGET_FRAMEWORK=net${{ matrix.dotnet-version }} \
-          --tag ${{ env.TEST_APP_IMAGE_TAG }} .
+        docker build -f ./IntegrationTests/Dockerfile --build-arg BASE_IMAGE=${{ env.BASE_IMAGE_TAG }} -build-arg TARGET_FRAMEWORK=net${{ matrix.dotnet-version }} --tag ${{ env.TEST_APP_IMAGE_TAG }} .
 
     - name: Run Application Tests Against Base Image
       working-directory: ./Testing/IntegrationTests
@@ -46,4 +44,75 @@ jobs:
         dotnet restore
         dotnet build --no-restore
         dotnet test --no-build
-        
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@0.28.0
+      with:
+        image-ref: ${{ env.TEST_APP_IMAGE_TAG }}
+        format: 'template'
+        template: '@.github/trivy/html.tpl'
+        output: 'trivy-results.html'
+
+    - name: Prepare scan report for pages
+      run: |
+        mkdir -p scan-reports
+        cp trivy-results.html scan-reports/${{ matrix.dotnet-version }}-${{ matrix.os }}.html        
+
+    - name: Upload scan report for pages
+      uses: actions/upload-artifact@v4
+      with:
+        name: scan-report-${{ matrix.dotnet-version }}-${{ matrix.os }}
+        path: scan-reports/
+
+    - name: Log in to Docker Hub
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+    - name: Tag and push image to Docker Hub
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: |
+        docker tag ${{ env.BASE_IMAGE_TAG }} ${{ env.PUBLISH_IMAGE_TAG }}
+        docker push ${{ env.PUBLISH_IMAGE_TAG }}
+
+  publish-scan-reports:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build-test-publishbase-images
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+    - name: Download all scan reports
+      uses: actions/download-artifact@v4
+      with:
+        pattern: scan-report-*
+        path: scan-reports/
+        merge-multiple: true
+
+    - name: Create index page
+      run: |
+        cd scan-reports
+        echo '<!DOCTYPE html><html><head><title>Trivy Scan Reports</title></head><body>' > index.html
+        echo '<h1>ABCpdf Docker Image Vulnerability Scan Reports</h1><ul>' >> index.html
+        for f in *.html; do
+          [ "$f" != "index.html" ] && echo "<li><a href=\"$f\">$f</a></li>" >> index.html
+        done
+        echo '</ul></body></html>' >> index.html
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+
+    - name: Upload to Pages
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: scan-reports/
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
