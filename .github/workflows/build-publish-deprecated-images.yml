@@ -1,7 +1,6 @@
 name: Build, Test and Publish ABCpdf Images
 
 on:
-  push:
   schedule:
      - cron: '0 4 * * 2'  # 4am UK time on Tuesdays (3am UTC for BST, 4am UTC would be 5am BST)
   workflow_dispatch:
