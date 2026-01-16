@@ -1,7 +1,7 @@
 # These are mandatory arguments
-ARG BASE_IMAGE_RC
+ARG BASE_IMAGE
 
-FROM ${BASE_IMAGE_RC} AS base
+FROM ${BASE_IMAGE} AS base
 RUN echo Using base image: ${BASE_IMAGE_RC}
 USER $APP_UID
 WORKDIR /app
