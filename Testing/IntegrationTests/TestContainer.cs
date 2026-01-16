@@ -7,17 +7,12 @@ namespace IntegrationTests;
 
 public sealed class TestContainer
 {
-	// This is the image tag of the abcpdf runtime docker image under test: e.g. " abcpdf/mcr-aspnet:10.0"
-	// It is expected to be set as an environment variable in the test runner environment.
-	private readonly string _testAppImageTag = GetEnvVar("TEST_APP_IMAGE_TAG");
-	private readonly string _abcpdfLicense = GetEnvVar("ABCPDF_LICENSE_KEY");
 	private IContainer? _container;
-
 	public async Task StartAsync(CancellationToken cancellationToken = default)
 	{
 		using var outputConsumer = Consume.RedirectStdoutAndStderrToConsole();
-
-		_container = new ContainerBuilder(_testAppImageTag)
+		throw new Exception(GetEnvVar("TEST_APP_IMAGE_TAG"));
+		_container = new ContainerBuilder(GetEnvVar("TEST_APP_IMAGE_TAG"))
 			.WithName("abcpdf_test_app_container")
 			.WithOutputConsumer(outputConsumer)
 			.WithWaitStrategy(
@@ -28,7 +23,7 @@ public sealed class TestContainer
 			.WithNetwork(new NetworkBuilder().Build())
 			.WithPortBinding(8080, true)
 			.WithPortBinding(8081, true)
-			.WithEnvironment("ABCPDF_LICENSE_KEY", _abcpdfLicense)
+			.WithEnvironment("ABCPDF_LICENSE_KEY", GetEnvVar("ABCPDF_LICENSE_KEY"))
 			.Build();
 
 		await _container.StartAsync(cancellationToken).ConfigureAwait(false);
