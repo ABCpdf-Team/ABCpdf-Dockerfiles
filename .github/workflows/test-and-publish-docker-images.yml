@@ -1,13 +1,13 @@
 name: Build, Test and Publish ABCpdf Images
 
 on:
-#  push:
-#    branches:
-#      - main
-#  pull_request:
-#  schedule:
-#    - cron: '0 3 * * 2'  # 4am UK time on Tuesdays (3am UTC for BST, 4am UTC would be 5am BST)
-   workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+  schedule:
+     - cron: '0 3 * * 2'  # 4am UK time on Tuesdays (3am UTC for BST, 4am UTC would be 5am BST)
+  workflow_dispatch:
 
 jobs:
   build-test-publishbase-images:
@@ -16,17 +16,7 @@ jobs:
       matrix:
         include:
           - os: "bookworm-slim"
-            dotnet-version: "6.0"
-          - os: "bookworm-slim"
-            dotnet-version: "7.0"
-          - os: "bookworm-slim"
             dotnet-version: "8.0"            
-          - os: "bookworm-slim"
-            dotnet-version: "8.0"            
-          - os: "jammy"
-            dotnet-version: "6.0"
-          - os: "jammy"
-            dotnet-version: "7.0"
           - os: "jammy"
             dotnet-version: "8.0"
           - os: "noble"
