@@ -1,0 +1,39 @@
+name: Build, Test and Publish ABCpdf Images
+
+on:
+  push:
+  schedule:
+     - cron: '0 4 * * 2'  # 4am UK time on Tuesdays (3am UTC for BST, 4am UTC would be 5am BST)
+  workflow_dispatch:
+
+jobs:
+  build-test-publish-base-images:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: "bookworm-slim"
+            dotnet-version: "6.0"            
+          - os: "bookworm-slim"
+            dotnet-version: "7.0"            
+          - os: "jammy"
+            dotnet-version: "6.0"
+          - os: "jammy"
+            dotnet-version: "7.0"
+    env:
+      DOTNET_VERSION: ${{ matrix.dotnet-version }}
+      BASE_IMAGE_TAG: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}
+      TEST_APP_IMAGE_TAG: abcpdf_test_app_container:${{ matrix.dotnet-version }}-${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v5
+    - name: Build Base Image
+      run: docker build -f ./Runtimes/mcr-aspnet-${{ matrix.os }}.Dockerfile -t  ${{ env.BASE_IMAGE_TAG }} --build-arg DOTNET_VERSION=${{ matrix.dotnet-version }} .
+      
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+    - name: Tag and push image to Docker Hub
+      run: docker push ${{ env.BASE_IMAGE_TAG }}

@@ -1,6 +1,6 @@
 # These are mandatory arguments
 ARG BASE_IMAGE=invalid:please-set
-
+ARG SDK=10.0
 FROM ${BASE_IMAGE} AS base
 USER $APP_UID
 WORKDIR /app
@@ -8,7 +8,7 @@ EXPOSE 8080
 EXPOSE 8081
 
 # This stage is used to build the service project
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:${SDK} AS build
 ARG RESOURCE_REAPER_SESSION_ID="00000000-0000-0000-0000-000000000000"
 ARG TARGET_FRAMEWORK
 ARG BUILD_CONFIGURATION=Release
