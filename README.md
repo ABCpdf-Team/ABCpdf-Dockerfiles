@@ -1,7 +1,15 @@
 # ABCpdf Dockerfiles
 
-This repo contains pipelines to build and push the most up-to-date images for our [Docker Hub repositories](https://hub.docker.com/u/abcpdf).
+This repo contains pipelines to build and push the most up-to-date images for our Docker Hub repositories.
 
-Fresh images are built for .NET 8.0 upwards on Tuesday's at 3am UTC.
+You generally want [current images](https://hub.docker.com/r/abcpdf/mcr-aspnet) but we also keep [older repositories](https://hub.docker.com/u/abcpdf).
 
-[Trivy Scans of latest containers.](https://abcpdf-team.github.io/ABCpdf-Dockerfiles/)
+
+Fresh images are built each Tuesday at 3am UTC.
+
+
+
+We scan each container with Trivy - a popular security scanner for cloud-native environments. Here are the [latest results](https://abcpdf-team.github.io/ABCpdf-Dockerfiles/).
+
+
+
