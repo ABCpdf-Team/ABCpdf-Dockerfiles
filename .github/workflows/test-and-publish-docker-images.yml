@@ -60,7 +60,7 @@ jobs:
         cp trivy-results.html scan-reports/${{ matrix.dotnet-version }}-${{ matrix.os }}.html        
 
     - name: Upload scan report for pages
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: scan-report-${{ matrix.dotnet-version }}-${{ matrix.os }}
         path: scan-reports/
