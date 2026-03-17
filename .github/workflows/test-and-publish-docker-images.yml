@@ -29,7 +29,7 @@ jobs:
       ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF_LICENSE_KEY }}
       DEFAULT_OS: "noble"
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Build Base Image
       run: |
         docker build -f ./Runtimes/mcr-aspnet-${{ matrix.os }}.Dockerfile -t  ${{ env.BASE_IMAGE_TAG }} --build-arg DOTNET_VERSION=${{ matrix.dotnet-version }} .
