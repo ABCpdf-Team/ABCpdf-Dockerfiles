@@ -47,7 +47,7 @@ jobs:
         dotnet test --no-build
 
     - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@0.28.0
+      uses: aquasecurity/trivy-action@0.35.0
       with:
         image-ref: ${{ env.TEST_APP_IMAGE_TAG }}
         format: 'template'
