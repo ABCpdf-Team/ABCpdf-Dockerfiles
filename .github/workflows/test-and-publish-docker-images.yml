@@ -21,7 +21,6 @@ jobs:
             abcchrome-version: "123"        
           - os: "22.04-jammy"
             dotnet-version: "8.0"
-            dotnet-version: "8.0"
             abcpdf-version: "13"
             abcchrome-version: "123"        
           - os: "26.04-resolute"
