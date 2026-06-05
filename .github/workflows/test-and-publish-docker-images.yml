@@ -30,4 +30,4 @@ jobs:
       run: |
         ls -l ./.github/scripts
         chmod +x ./.github/scripts/build-and-test-distro.sh
-        ./.github/scripts/build-and-test-distro.sh ${{ matrix.os }} ${{ matrix.dotnet-version }} ${{ matrix.abcpdf-version }} ${{ matrix.abcchrome-version }} ${{ secrets.ABCPDF_LICENSE_KEY }}
+        ./.github/scripts/build-and-test-distro.sh ${{ matrix.os }} ${{ matrix.dotnet-version }} ${{ matrix.abcpdf-version }} ${{ matrix.abcchrome-version }} ${{ secrets.ABCPDF14_LICENSE_KEY }}
