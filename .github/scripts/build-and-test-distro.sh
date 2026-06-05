@@ -67,7 +67,6 @@ echo "Test succeeded for ${TEST_DESC}"
 
 # echo Running tests in container using TestContainers.NET ${TEST_APPLICATION_IMAGE_TAG}...
 # export TEST_APP_IMAGE_TAG="${TEST_APPLICATION_IMAGE_TAG}"
-# export ABCPDF_LICENSE_KEY="[X/VKS0cJn5FgsCJaa6qGaI/wNrdyZOFn/8TBy+LwCl030VOTKXGCDeQ6PTc3hRVyW4oh/T5EojAUyKghTL58y0NBBhegPRp9gVFrEeTQKnzH803sxftUaIT+LGG1bmosUMMRdcdWqD0xSxF6pjLVAFBVH0S7UnLwn6ob91cuDsDOxrUpvTmAjkXNpOlSh25RQ04t7ltZ0SmXJSQIWqlzkk5n8hs=]"
 # cd IntegrationTests
 # #dotnet restore
 # #dotnet build --no-restore
