@@ -52,8 +52,12 @@ fi
 
 echo Build succeeded for test application
 TEST_DESC="${DISTRO} and .NET ${DOTNET_VERSION} using ABCPDF ${ABCPDF_VERSION} with Chrome ${ABCCHROME_VERSION}"
-docker run --rm --env ABCPDF_LICENSE_KEY=${ABCPDF_LICENSE_KEY} ${TEST_APP_IMAGE_TAG}     
 
+DOCKER_RUN_COMMAND="docker run --rm --env ABCPDF_LICENSE_KEY=${ABCPDF_LICENSE_KEY} ${TEST_APP_IMAGE_TAG}"
+echo Running command: \n${DOCKER_RUN_COMMAND}    
+${DOCKER_RUN_COMMAND}
+#docker run --rm --security-opt seccomp=/mnt/c/WSG/github/ABCpdf-Dockerfiles/ABCChromeSecomp.json --env ABCPDF_LICENSE_KEY=${ABCPDF_LICENSE_KEY} ${TEST_APP_IMAGE_TAG}     
+#docker run --rm --security-opt seccomp=unconfined --env ABCPDF_LICENSE_KEY=${ABCPDF_LICENSE_KEY} ${TEST_APP_IMAGE_TAG}     
 if [ $? -ne 0 ]; then
     echo "Error: Test failed for ${TEST_DESC} - return value was: $?" >&2
     exit 3
