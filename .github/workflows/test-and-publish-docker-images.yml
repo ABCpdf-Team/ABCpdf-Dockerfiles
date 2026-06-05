@@ -28,4 +28,5 @@ jobs:
     - uses: actions/checkout@v6
     - name: Build and test base Image and application image
       run: |
+        ls -l ./.github/scripts
         ./.github/scripts/build-and-test-distro.sh ${{ matrix.os }} ${{ matrix.dotnet-version }} ${{ matrix.abcpdf-version }} ${{ matrix.abcchrome-version }} ${{ secrets.ABCPDF_LICENSE_KEY }}
