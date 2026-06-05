@@ -30,15 +30,15 @@ jobs:
             abcpdf-version: "13"
             abcchrome-version: "123"
 
-          - os: "26.04-resolute"
-            dotnet-version: "10.0"
-            abcpdf-version: "14"
-            abcchrome-version: "123"
+          # - os: "26.04-resolute"
+          #   dotnet-version: "10.0"
+          #   abcpdf-version: "14"
+          #   abcchrome-version: "123"
 
-          - os: "26.04-resolute"
-            dotnet-version: "10.0"
-            abcpdf-version: "14"
-            abcchrome-version: "146"
+          # - os: "26.04-resolute"
+          #   dotnet-version: "10.0"
+          #   abcpdf-version: "14"
+          #   abcchrome-version: "146"
     env:
       DOTNET_VERSION: ${{ matrix.dotnet-version }}
       BASE_IMAGE_TAG: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}-${{ github.sha }}

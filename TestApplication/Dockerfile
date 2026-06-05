@@ -35,7 +35,7 @@ RUN chmod o+x /app/publish/ABCChrome${ABCCHROME_VERSION}/ABCChrome${ABCCHROME_VE
 # Required for Chrome's setuid sandbox fallback on distros that restrict unprivileged user namespaces
 # (Ubuntu 24.04+ / 26.04 via AppArmor). NuGet strips the setuid bit on extraction so it must be restored here.
 RUN chmod o+x /app/publish/ABCChrome123/ABCChrome123
-RUN chmod o+x /app/publish/ABCChrome146/ABCChrome146
+RUN if [ -f /app/publish/ABCChrome146/ABCChrome146 ]; then chmod o+x /app/publish/ABCChrome146/ABCChrome146; fi
 
 ######################################################################################################################################
 # In Docker debug mode the /app folder points to the local project folder. This means linux-native components will not be found. 
@@ -58,13 +58,12 @@ RUN chmod o+x /app/publish/ABCChrome146/ABCChrome146
 ######################################################################################################################################
 
 FROM base AS debug
-ARG ABCCHROME_VERSION
 WORKDIR /app
-COPY --from=publish /app/publish/ABCChrome${ABCCHROME_VERSION} /usr/local/bin/ABCChrome${ABCCHROME_VERSION}
+COPY --from=publish /app/publish/ABCChrome123 /usr/local/bin/ABCChrome123
+COPY --from=publish /app/publish/ABCChrome146 /usr/local/bin/ABCChrome146
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-#ENTRYPOINT ["dotnet", "TestApplication.dll"]
-SHELL ["/bin/bash", "-c"]
+ENTRYPOINT ["dotnet", "TestApplication.dll"]

@@ -19,6 +19,6 @@
   <ItemGroup>
     <PackageReference Include="ABCpdf" Version="$(ABCPDF_VERSION)" />
     <PackageReference Include="ABCpdf.ABCChrome123.Linux" Version="$(ABCPDF_VERSION)" />
-	<PackageReference Include="ABCpdf.ABCChrome146.Linux" Version="$(ABCPDF_VERSION)" />
+	<PackageReference Include="ABCpdf.ABCChrome146.Linux" Version="$(ABCPDF_VERSION)" Condition="'$(ABCPDF_VERSION)' == '14.*'" />
   </ItemGroup>	
 </Project>
