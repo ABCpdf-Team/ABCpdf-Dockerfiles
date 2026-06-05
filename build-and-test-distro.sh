@@ -17,7 +17,7 @@ TEST_APPLICATION_IMAGE_TAG="abcpdf_test_app_container:${DOTNET_VERSION}-${DISTRO
 
 # Build abcpd/mcr-aspnet RC base image 
 echo Building release candidate image for ${DISTRO} / .NET ${DOTNET_VERSION}...
-#docker build -f dockerfiles/mcr-aspnet-${DISTRO}.Dockerfile --progress=plain --build-arg DOTNET_VERSION=${DOTNET_VERSION} -t ${RC_BASE_IMAGE} ./dockerfiles
+docker build -f dockerfiles/mcr-aspnet-${DISTRO}.Dockerfile --progress=plain --build-arg DOTNET_VERSION=${DOTNET_VERSION} -t ${RC_BASE_IMAGE} ./dockerfiles
 
 if [ $? -ne 0 ]; then
     echo "Error: docker build failed for ${DISTRO} / .NET ${DOTNET_VERSION}" >&2
