@@ -55,7 +55,7 @@ TEST_DESC="${DISTRO} and .NET ${DOTNET_VERSION} using ABCPDF ${ABCPDF_VERSION} w
 docker run --rm --env ABCPDF_LICENSE_KEY=${ABCPDF_LICENSE_KEY} ${TEST_APP_IMAGE_TAG}     
 
 if [ $? -ne 0 ]; then
-    echo "Error: Test failed for ${TEST_DESC}" >&2
+    echo "Error: Test failed for ${TEST_DESC} - return value was: $?" >&2
     exit 3
 fi
 

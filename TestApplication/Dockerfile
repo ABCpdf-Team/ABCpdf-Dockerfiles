@@ -11,7 +11,6 @@ FROM ${BASE_IMAGE} AS base
 USER $APP_UID
 WORKDIR /app
 
-
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
@@ -33,6 +32,10 @@ RUN dotnet publish "./TestApplication.csproj" -c $BUILD_CONFIGURATION -o /app/pu
 # This is required to ensure ABCChrome can be launched by user "app" in production
 RUN echo "Setting execute permissions for ABCChrome${ABCCHROME_VERSION}..."
 RUN chmod o+x /app/publish/ABCChrome${ABCCHROME_VERSION}/ABCChrome${ABCCHROME_VERSION}
+# Required for Chrome's setuid sandbox fallback on distros that restrict unprivileged user namespaces
+# (Ubuntu 24.04+ / 26.04 via AppArmor). NuGet strips the setuid bit on extraction so it must be restored here.
+RUN chown root:root /app/publish/ABCChrome${ABCCHROME_VERSION}/chrome-sandbox \
+    && chmod 4755 /app/publish/ABCChrome${ABCCHROME_VERSION}/chrome-sandbox
 
 ######################################################################################################################################
 # In Docker debug mode the /app folder points to the local project folder. This means linux-native components will not be found. 
@@ -64,3 +67,4 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "TestApplication.dll"]
+#SHELL ["/bin/bash", "-c"]
