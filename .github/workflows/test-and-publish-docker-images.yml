@@ -82,7 +82,7 @@ jobs:
       run: |
         ./build-and-test-distro.sh ${{ matrix.os }} ${{ matrix.dotnet-version }} ${{ matrix.abcpdf-version }} ${{ matrix.abcchrome-version }} ${{ secrets.ABCPDF14_LICENSE_KEY }}
 
-      - name: Run Trivy vulnerability scanner
+    - name: Run Trivy vulnerability scanner
       if: env.RUN_PUBLISH_STEPS == 'true'
       uses: aquasecurity/trivy-action@v0.36.0
       with:
@@ -104,7 +104,7 @@ jobs:
         name: scan-report-${{ matrix.dotnet-version }}-${{ matrix.os }}
         path: scan-reports/
 
-    # Publish to Docker Hub if on main branch or scheduled or manually triggered
+    # Publish to Docker Hub steps
     - name: Log in to Docker Hub
       if: env.RUN_PUBLISH_STEPS == 'true'
       uses: docker/login-action@v4
