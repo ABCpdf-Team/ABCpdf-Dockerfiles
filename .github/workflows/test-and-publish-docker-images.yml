@@ -80,6 +80,7 @@ jobs:
     - uses: actions/checkout@v6
     - name: Build and test base Image and application image
       run: |
+        chmod +x build-and-test-distro.sh
         ./build-and-test-distro.sh ${{ matrix.os }} ${{ matrix.dotnet-version }} ${{ matrix.abcpdf-version }} ${{ matrix.abcchrome-version }} ${{ secrets.ABCPDF14_LICENSE_KEY }}
 
     - name: Run Trivy vulnerability scanner
