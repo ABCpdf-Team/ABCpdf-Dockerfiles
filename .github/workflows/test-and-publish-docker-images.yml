@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
   schedule:
      - cron: '0 3 * * 2'  # 4am UK time on Tuesdays (3am UTC for BST, 4am UTC would be 5am BST)
   workflow_dispatch:
@@ -15,38 +20,71 @@ jobs:
       fail-fast: false # Continue running all jobs in the matrix even if one fails
       matrix:
         include:
+          # Out of support versions of .net
           - os: "bookworm-slim"
-            dotnet-version: "8.0"            
-          - os: "jammy"
+            dotnet-version: "6.0"
+            abcpdf-version: "13"
+            abcchrome-version: "123"
+
+          - os: "bookworm-slim"
+            dotnet-version: "7.0"
+            abcpdf-version: "13"
+            abcchrome-version: "123"
+
+          - os: "22.04-jammy"
+            dotnet-version: "6.0"
+            abcpdf-version: "13"
+            abcchrome-version: "123"     
+
+          - os: "22.04-jammy"
+            dotnet-version: "7.0"
+            abcpdf-version: "13"
+            abcchrome-version: "123"     
+
+          # Supported images
+          - os: "bookworm-slim"
             dotnet-version: "8.0"
-          - os: "noble"
-            dotnet-version: "10.0"
+            abcpdf-version: "13"
+            abcchrome-version: "123"
+
+          - os: "22.04-jammy"
+            dotnet-version: "8.0"
+            abcpdf-version: "13"
+            abcchrome-version: "123"
+
+          - os: "24.04-noble"
+            dotnet-version: "8.0"
+            abcpdf-version: "13"
+            abcchrome-version: "123"
+
+          # - os: "26.04-resolute"
+          #   dotnet-version: "10.0"
+          #   abcpdf-version: "14"
+          #   abcchrome-version: "123"
+
+          # - os: "26.04-resolute"
+          #   dotnet-version: "10.0"
+          #   abcpdf-version: "14"
+          #   abcchrome-version: "146"
     env:
       DOTNET_VERSION: ${{ matrix.dotnet-version }}
       BASE_IMAGE_TAG: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}-${{ github.sha }}
       TEST_APP_IMAGE_TAG: abcpdf_test_app_container:${{ matrix.dotnet-version }}-${{ matrix.os }}
       PUBLISH_IMAGE_TAG: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}
-      ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF_LICENSE_KEY }}
-      DEFAULT_OS: "noble"
+      # What os to use if they only specify the dotnet version when pulling. 
+      # We should probably deprecate this eventually in favor of always requiring the os to be specified
+      DEFAULT_OS: "24.04-noble"
+      # Condition for scans and publish to docker hub - on schedule, manual trigger, or pushes to main
+      RUN_PUBLISH_STEPS: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
     steps:
     - uses: actions/checkout@v6
-    - name: Build Base Image
+    - name: Build and test base Image and application image
       run: |
-        docker build -f ./Runtimes/mcr-aspnet-${{ matrix.os }}.Dockerfile -t  ${{ env.BASE_IMAGE_TAG }} --build-arg DOTNET_VERSION=${{ matrix.dotnet-version }} .
-      
-    - name: Build Test Application Image
-      working-directory: ./Testing
-      run: |
-        docker build -f ./IntegrationTests/Dockerfile --build-arg BASE_IMAGE=${{ env.BASE_IMAGE_TAG }} --build-arg TARGET_FRAMEWORK=net${{ matrix.dotnet-version }} --tag ${{ env.TEST_APP_IMAGE_TAG }} .
-
-    - name: Run Application Tests Against Base Image
-      working-directory: ./Testing/IntegrationTests
-      run: |
-        dotnet restore
-        dotnet build --no-restore
-        dotnet test --no-build
+        chmod +x build-and-test-distro.sh
+        ./build-and-test-distro.sh ${{ matrix.os }} ${{ matrix.dotnet-version }} ${{ matrix.abcpdf-version }} ${{ matrix.abcchrome-version }} ${{ secrets.ABCPDF14_LICENSE_KEY }}
 
     - name: Run Trivy vulnerability scanner
+      if: env.RUN_PUBLISH_STEPS == 'true'
       uses: aquasecurity/trivy-action@v0.36.0
       with:
         image-ref: ${{ env.TEST_APP_IMAGE_TAG }}
@@ -55,34 +93,40 @@ jobs:
         output: 'trivy-results.html'
 
     - name: Prepare scan report for pages
+      if: env.RUN_PUBLISH_STEPS == 'true'
       run: |
         mkdir -p scan-reports
         cp trivy-results.html scan-reports/${{ matrix.dotnet-version }}-${{ matrix.os }}.html        
 
     - name: Upload scan report for pages
+      if: env.RUN_PUBLISH_STEPS == 'true'
       uses: actions/upload-artifact@v7
       with:
         name: scan-report-${{ matrix.dotnet-version }}-${{ matrix.os }}
         path: scan-reports/
 
+    # Publish to Docker Hub steps
     - name: Log in to Docker Hub
+      if: env.RUN_PUBLISH_STEPS == 'true'
       uses: docker/login-action@v4
       with:
         username: ${{ secrets.DOCKER_HUB_USERNAME }}
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
     - name: Tag and push image to Docker Hub
+      if: env.RUN_PUBLISH_STEPS == 'true'
       run: |
         docker tag ${{ env.BASE_IMAGE_TAG }} ${{ env.PUBLISH_IMAGE_TAG }}
         docker push ${{ env.PUBLISH_IMAGE_TAG }}
 
     - name: Tag default image for dotnet version
-      if: matrix.os == env.DEFAULT_OS
+      if: env.RUN_PUBLISH_STEPS == 'true' && matrix.os == env.DEFAULT_OS
       run: |
         docker tag ${{ env.BASE_IMAGE_TAG }} abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}
         docker push abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}
         
   publish-scan-reports:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     needs: build-test-publish-base-images
     runs-on: ubuntu-latest
     permissions:

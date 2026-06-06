@@ -1,0 +1,24 @@
+<Project>
+  <PropertyGroup>
+	  
+	  <TARGET_FWK Condition="'$(TARGET_FWK)' == ''">net8.0</TARGET_FWK>
+	  <ABCPDF_VERSION Condition="'$(ABCPDF_VERSION)' == ''">13.*</ABCPDF_VERSION>
+	  <ABCCHROME_VERSION Condition="'$(ABCCHROME_VERSION)' == ''">123</ABCCHROME_VERSION>
+	  <SYMBOLS Condition="'$(SYMBOLS)' == ''">ABCPDF_13</SYMBOLS>
+	  <!---
+	  <TARGET_FWK Condition="'$(TARGET_FWK)' == ''">net10.0</TARGET_FWK>
+	  <ABCPDF_VERSION Condition="'$(ABCPDF_VERSION)' == ''">14.*</ABCPDF_VERSION>
+	  <ABCCHROME_VERSION Condition="'$(ABCCHROME_VERSION)' == ''">146</ABCCHROME_VERSION>
+	  <SYMBOLS Condition="'$(SYMBOLS)' == ''">ABCPDF_14</SYMBOLS> 
+	  -->
+  </PropertyGroup>
+	<PropertyGroup>
+		<DefineConstants>$(SYMBOLS)</DefineConstants>
+	</PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ABCpdf" Version="$(ABCPDF_VERSION)" />
+    <PackageReference Include="ABCpdf.ABCChrome123.Linux" Version="$(ABCPDF_VERSION)" />
+	<PackageReference Include="ABCpdf.ABCChrome146.Linux" Version="$(ABCPDF_VERSION)" Condition="'$(ABCPDF_VERSION)' == '14.*'" />
+  </ItemGroup>	
+</Project>
