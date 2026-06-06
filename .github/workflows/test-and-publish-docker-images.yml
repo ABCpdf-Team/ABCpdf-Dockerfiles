@@ -68,8 +68,8 @@ jobs:
           #   abcchrome-version: "146"
     env:
       DOTNET_VERSION: ${{ matrix.dotnet-version }}
-      BASE_IMAGE_TAG: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}-${{ github.sha }}
-      TEST_APP_IMAGE_TAG: abcpdf_test_app_container:${{ matrix.dotnet-version }}-${{ matrix.os }}
+      BASE_IMAGE_TAG: abcpd/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}-rc
+      TEST_APP_IMAGE_TAG: abcpdf_test_app_container:${{ matrix.dotnet-version }}-${{ matrix.os }}-abcpdf${{ matrix.abcpdf-version }}-chrome${{ matrix.abcchrome-version }}
       PUBLISH_IMAGE_TAG: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}
       # What os to use if they only specify the dotnet version when pulling. 
       # We should probably deprecate this eventually in favor of always requiring the os to be specified
