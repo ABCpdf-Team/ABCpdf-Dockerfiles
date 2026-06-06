@@ -1,0 +1,6 @@
+@TestApplication_HostAddress = https://localhost:32781
+
+GET {{TestApplication_HostAddress}}/htmltopdf?htmlOrUrl=dddd
+Accept: application/json
+
+###

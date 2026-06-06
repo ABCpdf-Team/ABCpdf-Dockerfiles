@@ -1,3 +1,0 @@
-# Normalize text files and enforce LF by default
-* text=auto eol=lf
-
