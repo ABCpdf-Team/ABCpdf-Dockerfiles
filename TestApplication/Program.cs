@@ -18,18 +18,39 @@ if (!XSettings.InstallLicense(abcPdfLicense))
 const string htmlFilePath = "simple.html";
 
 try{
-    using Doc doc = new();
-    doc.HtmlOptions.Engine = EngineType.Chrome123;
-    Console.WriteLine($"Using ABCChrome version: {doc.HtmlOptions.Engine}");
-    doc.AddImageHtml(await new StreamReader(htmlFilePath).ReadToEndAsync());
-    doc.Save("output.pdf");
+    // Test with default Chome engine
+    await TestABCChrome(htmlFilePath);
+
+#if ABCPDF_14
+    await TestABCChrome(htmlFilePath, EngineType.Chrome123);
+#endif
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"Error generating PDF: {ex}");
+    Console.WriteLine($"Error generating PDF: {ex.Message} {ex}");
     return -99;
 }
 
 Console.WriteLine("PDF generation test application completed successfully.");
 
 return 0;
+
+static async Task TestABCChrome(string htmlFilePath, EngineType? engineType = null)
+{
+    using Doc doc = new();
+    if(engineType is not null)
+    {
+        doc.HtmlOptions.Engine = engineType.Value;
+    }
+    var testDescription = $"Testing with {Environment.Version} using {XSettings.Version} with {doc.HtmlOptions.Engine}";
+    Console.WriteLine($"Using ABCChrome version: {doc.HtmlOptions.Engine}");
+    doc.AddImageHtml(await new StreamReader(htmlFilePath).ReadToEndAsync());
+    doc.Save("output.pdf");
+    if (File.Exists("output.pdf"))
+    {
+        Console.WriteLine($"PDF creation: {testDescription} succeded.");
+    }
+    else {
+        throw new Exception($"{testDescription}");
+    }
+}

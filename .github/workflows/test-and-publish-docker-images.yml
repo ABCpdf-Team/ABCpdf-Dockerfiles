@@ -4,11 +4,7 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
+      - Add-26.04-and-simplify-tests
   schedule:
      - cron: '0 3 * * 2'  # 4am UK time on Tuesdays (3am UTC for BST, 4am UTC would be 5am BST)
   workflow_dispatch:
@@ -20,60 +16,50 @@ jobs:
       fail-fast: false # Continue running all jobs in the matrix even if one fails
       matrix:
         include:
-          # Out of support versions of .net
+          # Deprecated images
           - os: "bookworm-slim"
             dotnet-version: "6.0"
             abcpdf-version: "13"
-            abcchrome-version: "123"
 
           - os: "bookworm-slim"
             dotnet-version: "7.0"
             abcpdf-version: "13"
-            abcchrome-version: "123"
 
-          - os: "22.04-jammy"
+          - os: "jammy"
             dotnet-version: "6.0"
             abcpdf-version: "13"
-            abcchrome-version: "123"     
 
-          - os: "22.04-jammy"
+          - os: "jammy"
             dotnet-version: "7.0"
             abcpdf-version: "13"
-            abcchrome-version: "123"     
 
-          # Supported images
+          # Currently supported
           - os: "bookworm-slim"
             dotnet-version: "8.0"
             abcpdf-version: "13"
-            abcchrome-version: "123"
 
-          - os: "22.04-jammy"
+          - os: "jammy"
             dotnet-version: "8.0"
             abcpdf-version: "13"
-            abcchrome-version: "123"
-
-          - os: "24.04-noble"
+          
+          - os: "noble"
             dotnet-version: "8.0"
             abcpdf-version: "13"
-            abcchrome-version: "123"
 
-          # - os: "26.04-resolute"
+          - os: "noble"
+            dotnet-version: "10.0"
+            abcpdf-version: "13"
+
+          # - os: "resolute"
           #   dotnet-version: "10.0"
           #   abcpdf-version: "14"
-          #   abcchrome-version: "123"
 
-          # - os: "26.04-resolute"
-          #   dotnet-version: "10.0"
-          #   abcpdf-version: "14"
-          #   abcchrome-version: "146"
     env:
-      DOTNET_VERSION: ${{ matrix.dotnet-version }}
-      BASE_IMAGE_TAG: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}-${{ github.sha }}
-      TEST_APP_IMAGE_TAG: abcpdf_test_app_container:${{ matrix.dotnet-version }}-${{ matrix.os }}
+      ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF14_LICENSE_KEY }}
+      BASE_IMAGE_TAG: abcpdf-rc-${{ matrix.dotnet-version }}-${{ matrix.os }}
       PUBLISH_IMAGE_TAG: abcpdf/mcr-aspnet:${{ matrix.dotnet-version }}-${{ matrix.os }}
-      # What os to use if they only specify the dotnet version when pulling. 
       # We should probably deprecate this eventually in favor of always requiring the os to be specified
-      DEFAULT_OS: "24.04-noble"
+      DEFAULT_OS: "noble"
       # Condition for scans and publish to docker hub - on schedule, manual trigger, or pushes to main
       RUN_PUBLISH_STEPS: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
     steps:
@@ -81,13 +67,13 @@ jobs:
     - name: Build and test base Image and application image
       run: |
         chmod +x build-and-test-distro.sh
-        ./build-and-test-distro.sh ${{ matrix.os }} ${{ matrix.dotnet-version }} ${{ matrix.abcpdf-version }} ${{ matrix.abcchrome-version }} ${{ secrets.ABCPDF14_LICENSE_KEY }}
+        ./build-and-test-distro.sh ${{ matrix.os }} ${{ matrix.dotnet-version }} ${{ matrix.abcpdf-version }} ${{ env.BASE_IMAGE_TAG }}
 
     - name: Run Trivy vulnerability scanner
       if: env.RUN_PUBLISH_STEPS == 'true'
       uses: aquasecurity/trivy-action@v0.36.0
       with:
-        image-ref: ${{ env.TEST_APP_IMAGE_TAG }}
+        image-ref: ${{ env.BASE_IMAGE_TAG }}
         format: 'template'
         template: '@.github/trivy/html.tpl'
         output: 'trivy-results.html'

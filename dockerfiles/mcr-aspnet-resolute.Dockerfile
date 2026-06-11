@@ -1,4 +1,4 @@
-ARG DOTNET_VERSION=99.0 # Default to an invalid version to force the user to set it
+ARG DOTNET_VERSION=DOTNET_VERSION_NOT_SET
 FROM mcr.microsoft.com/dotnet/aspnet:${DOTNET_VERSION}-resolute
 RUN apt-get update \
     && apt-get upgrade -y\
@@ -50,6 +50,7 @@ RUN apt-get update \
     libxrender1 \
     libegl1 \
     curl \
+    libcurl3-gnutls \
 # Install a reasonable set of fonts
     fonts-noto-core \
     fonts-noto-mono \
