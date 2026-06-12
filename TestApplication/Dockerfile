@@ -26,7 +26,7 @@ RUN echo ${BUILD_CONFIGURATION}
 RUN echo "TARGET_FWK: $TARGET_FWK\nABCPDF_VERSION: $ABCPDF_VERSION\nBUILD_CONFIGURATION: $BUILD_CONFIGURATION"
 WORKDIR /src
 COPY ["TestApplication.csproj", "Directory.Build.props", "NuGet.config", "./"]
-COPY ["./local_nuget*", "./local_nuget"]
+#COPY ["./local_nuget*", "./local_nuget"] # For internal use
 RUN dotnet restore "./TestApplication.csproj"
 COPY . .
 WORKDIR "/src/."
