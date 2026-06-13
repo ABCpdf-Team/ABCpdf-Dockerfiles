@@ -50,9 +50,9 @@ jobs:
             dotnet-version: "10.0"
             abcpdf-version: "13"
 
-          # - os: "resolute"
-          #   dotnet-version: "10.0"
-          #   abcpdf-version: "14"
+          - os: "resolute"
+            dotnet-version: "10.0"
+            abcpdf-version: "14"
 
     env:
       ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF14_LICENSE_KEY }}
