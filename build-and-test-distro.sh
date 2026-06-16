@@ -40,8 +40,6 @@ docker build -f dockerfiles/mcr-aspnet-${DISTRO}.Dockerfile --build-arg DOTNET_V
 echo Build succeeded for ${RC_BASE_IMAGE}
 
 docker build -f ./TestApplication/Dockerfile \
-    --no-cache \
-    --progress=plain \
     --build-arg BASE_IMAGE=${RC_BASE_IMAGE} \
     --build-arg TARGET_FWK=net${DOTNET_VERSION} \
     --build-arg ABCPDF_VERSION=${ABCPDF_VERSION}.* \
@@ -58,7 +56,7 @@ TEST_APP_CONTAINER_NAME="TestABCpdf-${ABCPDF_VERSION}-${DOTNET_VERSION}-${DISTRO
 # Remove any previous container with the same name
 docker rm --force ${TEST_APP_CONTAINER_NAME} || true # ignore errors
 
-echo Running test for: ${TEST_DESC}
+echo Running test with: ${TEST_APP_CONTAINER_NAME}
 
 docker run --env ABCPDF_LICENSE_KEY=${ABCPDF_LICENSE_KEY} --name ${TEST_APP_CONTAINER_NAME} ${TEST_APP_IMAGE_TAG}
 

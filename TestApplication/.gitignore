@@ -3,3 +3,5 @@ obj/
 .vs/
 *.user
 *.suo
+Staging/
+local_nuget/
