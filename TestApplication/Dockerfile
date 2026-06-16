@@ -9,8 +9,7 @@ ARG BUILD_CONFIGURATION=Release
 
 FROM $BASE_IMAGE AS base
 ARG BASE_IMAGE
-RUN echo -e "BASE_IMAGE: $BASE_IMAGE"
-RUN mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix
+RUN echo "Using BASE_IMAGE: $BASE_IMAGE"
 USER $APP_UID
 WORKDIR /app
 
@@ -25,8 +24,7 @@ ARG SYMBOLS
 RUN echo ${BUILD_CONFIGURATION}
 RUN echo "TARGET_FWK: $TARGET_FWK\nABCPDF_VERSION: $ABCPDF_VERSION\nBUILD_CONFIGURATION: $BUILD_CONFIGURATION"
 WORKDIR /src
-COPY ["TestApplication.csproj", "Directory.Build.props", "NuGet.config", "./"]
-#COPY ["./local_nuget*", "./local_nuget"] # For internal use
+COPY ["TestApplication.csproj", "Directory.Build.props", "./"]
 RUN dotnet restore "./TestApplication.csproj"
 COPY . .
 WORKDIR "/src/."
@@ -38,7 +36,7 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./TestApplication.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 # This is required to ensure ABCChrome can be launched by user "app" in production
 RUN echo "Setting execute permissions for ABCChrome..."
-RUN chmod o+x /app/publish/ABCChrome123/ABCChrome123
+RUN if [ -f /app/publish/ABCChrome123/ABCChrome123 ]; then chmod o+x /app/publish/ABCChrome123/ABCChrome123; fi
 RUN if [ -f /app/publish/ABCChrome146/ABCChrome146 ]; then chmod o+x /app/publish/ABCChrome146/ABCChrome146; fi
 
 ######################################################################################################################################
