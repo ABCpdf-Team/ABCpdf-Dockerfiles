@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - Add-26.04-and-simplify-tests
   schedule:
      - cron: '0 3 * * 2'  # 4am UK time on Tuesdays (3am UTC for BST, 4am UTC would be 5am BST)
   workflow_dispatch:
