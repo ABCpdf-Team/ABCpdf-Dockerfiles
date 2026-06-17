@@ -39,6 +39,7 @@ echo Building release candidate image: ${RC_BASE_IMAGE}...
 docker build -f dockerfiles/mcr-aspnet-${DISTRO}.Dockerfile --build-arg DOTNET_VERSION=${DOTNET_VERSION} -t ${RC_BASE_IMAGE} ./dockerfiles
 echo Build succeeded for ${RC_BASE_IMAGE}
 
+echo Building test application image: ${TEST_APP_IMAGE_TAG}...
 docker build -f ./TestApplication/Dockerfile \
     --build-arg BASE_IMAGE=${RC_BASE_IMAGE} \
     --build-arg TARGET_FWK=net${DOTNET_VERSION} \
@@ -47,8 +48,8 @@ docker build -f ./TestApplication/Dockerfile \
     --build-arg SYMBOLS=${DOTNET_BUILD_SYMBOLS} \
     --tag ${TEST_APP_IMAGE_TAG} \
     ./TestApplication
+echo Build succeeded for ${TEST_APP_IMAGE_TAG}...
 
-echo Build succeeded for test application
 
 TEST_DESC="${DISTRO} and .NET ${DOTNET_VERSION} using ABCPDF ${ABCPDF_VERSION}"
 TEST_APP_CONTAINER_NAME="TestABCpdf-${ABCPDF_VERSION}-${DOTNET_VERSION}-${DISTRO}"
@@ -56,8 +57,6 @@ TEST_APP_CONTAINER_NAME="TestABCpdf-${ABCPDF_VERSION}-${DOTNET_VERSION}-${DISTRO
 # Remove any previous container with the same name
 docker rm --force ${TEST_APP_CONTAINER_NAME} || true # ignore errors
 
-echo Running test with: ${TEST_APP_CONTAINER_NAME}
-
-docker run --env ABCPDF_LICENSE_KEY=${ABCPDF_LICENSE_KEY} --name ${TEST_APP_CONTAINER_NAME} ${TEST_APP_IMAGE_TAG}
-
+echo Running test image with: ${TEST_APP_CONTAINER_NAME}
+docker run --rm --env ABCPDF_LICENSE_KEY=${ABCPDF_LICENSE_KEY} --name ${TEST_APP_CONTAINER_NAME} ${TEST_APP_IMAGE_TAG}
 echo "Test succeeded for ${TEST_DESC}"

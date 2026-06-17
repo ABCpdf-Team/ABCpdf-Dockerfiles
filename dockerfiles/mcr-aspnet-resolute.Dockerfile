@@ -1,8 +1,10 @@
 ARG DOTNET_VERSION=DOTNET_VERSION_NOT_SET
+
 FROM mcr.microsoft.com/dotnet/aspnet:${DOTNET_VERSION}-resolute
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
     && apt-get upgrade -y\
-    && apt-get install -y \
+    && apt-get install --no-install-recommends -y \
     ca-certificates \
     libasound2t64 \
     libatk1.0-0t64 \
