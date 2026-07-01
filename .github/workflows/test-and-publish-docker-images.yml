@@ -63,7 +63,7 @@ jobs:
       # Condition for scans and publish to docker hub - on schedule, manual trigger, or pushes to main
       RUN_PUBLISH_STEPS: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Build and test base Image and application image
       run: |
         chmod +x build-and-test-distro.sh
