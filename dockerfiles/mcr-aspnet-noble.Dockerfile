@@ -1,7 +1,7 @@
 ARG DOTNET_VERSION=99.0 # Default to an invalid version to force the user to set it
 
 FROM mcr.microsoft.com/dotnet/aspnet:${DOTNET_VERSION}-noble
-ENV DEBIAN_FRONTEND=noninteractive
+ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
     && apt-get upgrade -y\
     && apt-get install --no-install-recommends -y \

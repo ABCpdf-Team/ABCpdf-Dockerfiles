@@ -1,7 +1,7 @@
 ARG DOTNET_VERSION=DOTNET_VERSION_NOT_SET
 
 FROM mcr.microsoft.com/dotnet/aspnet:${DOTNET_VERSION}-resolute
-ENV DEBIAN_FRONTEND=noninteractive
+ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
     && apt-get upgrade -y\
     && apt-get install --no-install-recommends -y \
