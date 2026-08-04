@@ -3,7 +3,7 @@ name: Build, Test and Publish Chiseled ABCpdf Images
 on:
   push:
     branches:
-      - main
+      - add-chiseled-image
   workflow_dispatch:
 
 jobs:
