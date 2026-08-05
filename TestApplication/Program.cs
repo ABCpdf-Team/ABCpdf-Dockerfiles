@@ -48,7 +48,7 @@ static async Task TestABCChrome(string htmlFilePath, EngineType? engineType = nu
     doc.Save("output.pdf");
     if (File.Exists("output.pdf"))
     {
-        Console.WriteLine($"PDF creation: {testDescription} succeded.");
+        Console.WriteLine($"PDF creation: {testDescription} succeeded.");
     }
     else {
         throw new Exception($"{testDescription}");
