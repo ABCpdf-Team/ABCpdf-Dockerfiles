@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Chiseled build for Ubuntu 26.04 (resolute) / .NET 10 only.
 #
 # Instead of installing a full Ubuntu userland via apt, this cuts just the
@@ -46,9 +47,16 @@ ARG CHISEL_VERSION=v1.4.2
 ARG CHISEL_SHA384=8e5e8df4dc783dcfa827ca9990ba871af350738de67c51706b3c06bfd4725ab0edbddd9ad4110d1047ecfdc586f7dac6
 ARG CHISEL_WRAPPER_VERSION=v1.2.0
 
-RUN apt-get update \
-    && apt-get install --no-install-recommends -y ca-certificates curl file \
-    && rm -rf /var/lib/apt/lists/*
+# Keep apt's downloaded package/index files in a persistent BuildKit cache
+# mount instead of the image layer, so a re-run after a network blip (or a
+# --no-cache build) doesn't have to re-fetch everything apt already has.
+RUN rm -f /etc/apt/apt.conf.d/docker-clean \
+    && echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    apt-get update \
+    && apt-get install --no-install-recommends -y ca-certificates curl file
 
 RUN chisel_url="https://github.com/canonical/chisel/releases/download/${CHISEL_VERSION}/chisel_${CHISEL_VERSION}_linux_amd64.tar.gz" \
     && curl --fail --show-error --location --output chisel.tar.gz "${chisel_url}" \
@@ -167,9 +175,13 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN dpkg-query -W -f='${Package}\n' | sort > /base-packages.txt
 
-RUN apt-get update \
-    && apt-get install --no-install-recommends -y libgtk-3-0 libegl1 \
-    && rm -rf /var/lib/apt/lists/*
+RUN rm -f /etc/apt/apt.conf.d/docker-clean \
+    && echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    apt-get update \
+    && apt-get install --no-install-recommends -y libgtk-3-0 libegl1
 
 # Diff against the pristine base image's package list to find every package
 # that installing libgtk-3-0/libegl1 pulled in (transitively), then copy only
