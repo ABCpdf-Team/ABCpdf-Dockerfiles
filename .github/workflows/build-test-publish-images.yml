@@ -91,7 +91,7 @@ jobs:
             abcpdf-version: "14"
             # One tag per line - add as many as you like.
             tags: |
-              abcpdf/abcpdf:14.0-chiseled
+              abcpdf/abcpdf:14-chiseled
           # Add more images here as they're created - just give each one a
           # unique name, dockerfile, and its own list of tags.
 
