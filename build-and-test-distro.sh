@@ -3,9 +3,9 @@
 # Exit if any command errors
 set -e
 
-if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ]; then
-    echo "Usage: $0 <distro-name> <dotnet-version> <abcpdf-version> <rc-image-name:tag>"
-    echo "Example: $0 26.04-resolute 10.0 14 abcpdf14-10.0-resolute-rc"
+if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "Usage: $0 <dockerfile-path> <dotnet-version> [abcpdf-version]"
+    echo "Example: $0 dockerfiles/abcpdf14.Dockerfile 10.0 14"
     exit 1
 fi
 
@@ -14,10 +14,10 @@ if [ -z "${ABCPDF_LICENSE_KEY}" ]; then
     exit 1
 fi
 
-DISTRO=$1
-DOTNET_VERSION=$2
-ABCPDF_VERSION=$3
-RC_BASE_IMAGE=$4
+DOCKERFILE_PATH="$1"
+DOTNET_VERSION="$2"
+ABCPDF_VERSION="${3:-14}"
+TARGET_FWK="net${DOTNET_VERSION}"
 
 BUILD_CONFIGURATION=Release
 DOTNET_BUILD_SYMBOLS="ABCPDF_${ABCPDF_VERSION%%.*}"
@@ -25,24 +25,26 @@ DOTNET_BUILD_SYMBOLS="ABCPDF_${ABCPDF_VERSION%%.*}"
 echo \
 "#####################################################
 # Test Parameters
-# DISTRO:               ${DISTRO}
+# DOCKERFILE_PATH:      ${DOCKERFILE_PATH}
+# TARGET_FWK:           ${TARGET_FWK}
 # DOTNET_VERSION:       ${DOTNET_VERSION}
 # ABCPDF_VERSION:       ${ABCPDF_VERSION}
 # DOTNET_BUILD_SYMBOLS: ${DOTNET_BUILD_SYMBOLS}
 # BUILD_CONFIGURATION:  ${BUILD_CONFIGURATION}
 #####################################################"
 
-TEST_APP_IMAGE_TAG="abcpdf_test_app:${DOTNET_VERSION}-${DISTRO}-abcpdf${ABCPDF_VERSION}"
+RC_BASE_IMAGE="abcpdf14-rc:$(basename "${DOCKERFILE_PATH}" .Dockerfile)"
+TEST_APP_IMAGE_TAG="abcpdf_test_app:${TARGET_FWK}-$(basename "${DOCKERFILE_PATH}" .Dockerfile)-abcpdf${ABCPDF_VERSION}"
 
-# Build abcpd/mcr-aspnet RC base image
+echo "Building from: ${DOCKERFILE_PATH}"
 echo Building release candidate image: ${RC_BASE_IMAGE}...
-docker build -f dockerfiles/mcr-aspnet-${DISTRO}.Dockerfile --build-arg DOTNET_VERSION=${DOTNET_VERSION} -t ${RC_BASE_IMAGE} ./dockerfiles
+docker build -f "${DOCKERFILE_PATH}" --build-arg DOTNET_VERSION="${DOTNET_VERSION}" -t "${RC_BASE_IMAGE}" ./dockerfiles
 echo Build succeeded for ${RC_BASE_IMAGE}
 
 echo Building test application image: ${TEST_APP_IMAGE_TAG}...
 docker build -f ./TestApplication/Dockerfile \
     --build-arg BASE_IMAGE=${RC_BASE_IMAGE} \
-    --build-arg TARGET_FWK=net${DOTNET_VERSION} \
+    --build-arg TARGET_FWK=${TARGET_FWK} \
     --build-arg ABCPDF_VERSION=${ABCPDF_VERSION}.* \
     --build-arg BUILD_CONFIGURATION=${BUILD_CONFIGURATION} \
     --build-arg SYMBOLS=${DOTNET_BUILD_SYMBOLS} \
@@ -51,8 +53,8 @@ docker build -f ./TestApplication/Dockerfile \
 echo Build succeeded for ${TEST_APP_IMAGE_TAG}...
 
 
-TEST_DESC="${DISTRO} and .NET ${DOTNET_VERSION} using ABCPDF ${ABCPDF_VERSION}"
-TEST_APP_CONTAINER_NAME="TestABCpdf-${ABCPDF_VERSION}-${DOTNET_VERSION}-${DISTRO}"
+TEST_DESC="$(basename "${DOCKERFILE_PATH}" .Dockerfile) and .NET ${DOTNET_VERSION} using ABCPDF ${ABCPDF_VERSION}"
+TEST_APP_CONTAINER_NAME="TestABCpdf-${ABCPDF_VERSION}-${DOTNET_VERSION}-$(basename "${DOCKERFILE_PATH}" .Dockerfile)"
 
 # Remove any previous container with the same name
 docker rm --force ${TEST_APP_CONTAINER_NAME} || true # ignore errors

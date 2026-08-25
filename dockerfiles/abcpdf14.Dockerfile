@@ -52,4 +52,5 @@ RUN apt-get update \
     libxrender1 \
     libegl1 \
     curl \
-    libcurl3-gnutls
+    libcurl3-gnutls \
+    python3
