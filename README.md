@@ -4,7 +4,7 @@ This repo contains pipelines to build and push the most up-to-date images for ou
 
 These Docker images bundle the ABCpdf .NET library on top of Microsoft's official .NET runtime images, giving you a ready-to-run environment for PDF generation and manipulation.
 
-The current images can be found at [docker.com](https://hub.docker.com/r/abcpdf/mcr-aspnet).
+The current images can be found at [docker.com](https://hub.docker.com/r/abcpdf/abcpdf).
 
 The current Trivy security scan results can be found [here](https://abcpdf-team.github.io/ABCpdf-Dockerfiles/).
 

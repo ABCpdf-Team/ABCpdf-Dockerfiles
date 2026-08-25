@@ -1,4 +1,4 @@
-ARG DOTNET_VERSION=DOTNET_VERSION_NOT_SET
+ARG DOTNET_VERSION=10.0
 
 FROM mcr.microsoft.com/dotnet/aspnet:${DOTNET_VERSION}-resolute
 ARG DEBIAN_FRONTEND=noninteractive
@@ -53,8 +53,4 @@ RUN apt-get update \
     libegl1 \
     curl \
     libcurl3-gnutls \
-# Install a reasonable set of fonts
-    fonts-noto-core \
-    fonts-noto-mono \
-    fonts-noto-color-emoji \
-    && fc-cache -f -v 
+    python3
