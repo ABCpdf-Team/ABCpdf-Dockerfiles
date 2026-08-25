@@ -16,51 +16,53 @@ jobs:
       matrix:
         include:
           # Deprecated images
-          - name: bookworm-slim-6.0
-            dockerfile: dockerfiles/mcr-aspnet-bookworm-slim.Dockerfile
+          # NB Bookworm security support updates end June 2028
+          - name: bookworm-slim-6.0 # Support ends June 2028
+            dockerfile: dockerfiles/deprecated/mcr-aspnet-bookworm-slim.Dockerfile
             dotnet-version: "6.0"
             abcpdf-version: "13"
             tags: |
               abcpdf/mcr-aspnet:6.0-bookworm-slim
 
           - name: bookworm-slim-7.0
-            dockerfile: dockerfiles/mcr-aspnet-bookworm-slim.Dockerfile
+            dockerfile: dockerfiles/deprecated/mcr-aspnet-bookworm-slim.Dockerfile
             dotnet-version: "7.0"
             abcpdf-version: "13"
             tags: |
               abcpdf/mcr-aspnet:7.0-bookworm-slim
 
+          - name: bookworm-slim-8.0
+            dockerfile: dockerfiles/deprecated/mcr-aspnet-bookworm-slim.Dockerfile
+            dotnet-version: "8.0"
+            abcpdf-version: "13"
+            tags: |
+              abcpdf/mcr-aspnet:8.0-bookworm-slim
+
+          # NB Jammy security support updates end May 2027
           - name: jammy-6.0
-            dockerfile: dockerfiles/mcr-aspnet-jammy.Dockerfile
+            dockerfile: dockerfiles/deprecated/mcr-aspnet-jammy.Dockerfile
             dotnet-version: "6.0"
             abcpdf-version: "13"
             tags: |
               abcpdf/mcr-aspnet:6.0-jammy
 
           - name: jammy-7.0
-            dockerfile: dockerfiles/mcr-aspnet-jammy.Dockerfile
+            dockerfile: dockerfiles/deprecated/mcr-aspnet-jammy.Dockerfile
             dotnet-version: "7.0"
             abcpdf-version: "13"
             tags: |
               abcpdf/mcr-aspnet:7.0-jammy
 
-          # Currently supported
-          - name: bookworm-slim-8.0
-            dockerfile: dockerfiles/mcr-aspnet-bookworm-slim.Dockerfile
-            dotnet-version: "8.0"
-            abcpdf-version: "13"
-            tags: |
-              abcpdf/mcr-aspnet:8.0-bookworm-slim
-
           - name: jammy-8.0
-            dockerfile: dockerfiles/mcr-aspnet-jammy.Dockerfile
+            dockerfile: dockerfiles/deprecated/mcr-aspnet-jammy.Dockerfile
             dotnet-version: "8.0"
             abcpdf-version: "13"
             tags: |
               abcpdf/mcr-aspnet:8.0-jammy
 
+          # NB Noble security support updates end May 2029
           - name: noble-8.0
-            dockerfile: dockerfiles/mcr-aspnet-noble.Dockerfile
+            dockerfile: dockerfiles/deprecated/mcr-aspnet-noble.Dockerfile
             dotnet-version: "8.0"
             abcpdf-version: "13"
             # noble is the default OS for its dotnet version, so it also gets
@@ -70,75 +72,53 @@ jobs:
               abcpdf/mcr-aspnet:8.0
 
           - name: noble-10.0
-            dockerfile: dockerfiles/mcr-aspnet-noble.Dockerfile
+            dockerfile: dockerfiles/deprecated/mcr-aspnet-noble.Dockerfile
             dotnet-version: "10.0"
             abcpdf-version: "13"
             tags: |
               abcpdf/mcr-aspnet:10.0-noble
               abcpdf/mcr-aspnet:10.0
 
-          - name: resolute-10.0
-            dockerfile: dockerfiles/mcr-aspnet-resolute.Dockerfile
+          # NB Resolute security support updates end May 2031
+          - name: abcpdf14
+            dockerfile: dockerfiles/abcpdf14.Dockerfile
             dotnet-version: "10.0"
             abcpdf-version: "14"
+            # NB 2nd tag is in deprecated repository but we keep it updated from here anyway
             tags: |
-              abcpdf/mcr-aspnet:10.0-resolute
               abcpdf/abcpdf:14
+              abcpdf/mcr-aspnet:10.0-resolute
 
-          - name: resolute-chiseled
-            dockerfile: dockerfiles/abcpdf14-resolute-chiseled.Dockerfile
+          - name: abcpdf14-chiseled
+            dockerfile: dockerfiles/abcpdf14-chiseled.Dockerfile
             dotnet-version: "10.0"
             abcpdf-version: "14"
-            # One tag per line - add as many as you like.
             tags: |
               abcpdf/abcpdf:14-chiseled
-          # Add more images here as they're created - just give each one a
-          # unique name, dockerfile, and its own list of tags.
 
     env:
       ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF14_LICENSE_KEY }}
-      BASE_IMAGE_TAG: abcpdf-rc-${{ matrix.name }}
-      TEST_APP_IMAGE_TAG: abcpdf_test_app:${{ matrix.name }}
-      # Condition for scans and publish to docker hub - on schedule, manual trigger, or pushes to main
       RUN_PUBLISH_STEPS: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
 
     steps:
       - uses: actions/checkout@v7
 
       # ---- Build --------------------------------------------------------------
-      - name: Build image
-        run: |
-          docker build \
-            -f ${{ matrix.dockerfile }} \
-            --build-arg DOTNET_VERSION=${{ matrix.dotnet-version }} \
-            -t ${{ env.BASE_IMAGE_TAG }} \
-            ./dockerfiles
+      - name: Build RC image
+        run: ./scripts/build-base-image.sh ${{ matrix.dockerfile }} abcpdf-rc-${{ matrix.name }} ${{ matrix.dotnet-version }}
 
       # ---- Test -----------------------------------------------------------------
-      - name: Build test application image
+      - name: Build and run test application
         run: |
-          docker build -f ./TestApplication/Dockerfile \
-            --build-arg BASE_IMAGE=${{ env.BASE_IMAGE_TAG }} \
-            --build-arg TARGET_FWK=net${{ matrix.dotnet-version }} \
-            --build-arg ABCPDF_VERSION=${{ matrix.abcpdf-version }}.* \
-            --build-arg BUILD_CONFIGURATION=Release \
-            --build-arg SYMBOLS=ABCPDF_${{ matrix.abcpdf-version }} \
-            --tag ${{ env.TEST_APP_IMAGE_TAG }} \
-            ./TestApplication
-
-      - name: Run test application
-        run: |
-          docker run --rm \
-            --env ABCPDF_LICENSE_KEY=${{ env.ABCPDF_LICENSE_KEY }} \
-            --name TestABCpdf-${{ matrix.name }} \
-            ${{ env.TEST_APP_IMAGE_TAG }}
+          DOTNET_MAJOR=$(echo "${{ matrix.dotnet-version }}" | cut -d. -f1)
+          ./scripts/run-test-app.sh abcpdf-rc-${{ matrix.name }} "$DOTNET_MAJOR" "${{ matrix.abcpdf-version }}"
 
       # ---- Scan -----------------------------------------------------------------
       - name: Run Trivy vulnerability scanner
         if: env.RUN_PUBLISH_STEPS == 'true'
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: ${{ env.BASE_IMAGE_TAG }}
+          image-ref: abcpdf-rc-${{ matrix.name }}
           format: 'template'
           template: '@.github/trivy/html.tpl'
           output: 'trivy-results.html'
@@ -169,8 +149,8 @@ jobs:
         run: |
           echo "${{ matrix.tags }}" | while IFS= read -r tag; do
             [ -z "$tag" ] && continue
-            docker tag "${{ env.BASE_IMAGE_TAG }}" "$tag"
-            docker push "$tag"
+            docker tag "abcpdf-rc-${{ matrix.name }}" "$tag"
+            docker push "$tag" || { echo "Failed to push $tag"; exit 1; }
           done
 
   publish-scan-reports:
