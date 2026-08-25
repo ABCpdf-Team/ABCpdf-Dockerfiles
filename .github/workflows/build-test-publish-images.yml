@@ -81,7 +81,7 @@ jobs:
               abcpdf/mcr-aspnet:10.0
 
           # NB Resolute security support updates end May 2031
-          - name: ABCpdf14
+          - name: abcpdf14
             dockerfile: dockerfiles/abcpdf14.Dockerfile
             dotnet-version: "10.0"
             abcpdf-version: "14"
@@ -90,7 +90,7 @@ jobs:
               abcpdf/abcpdf:14
               abcpdf/mcr-aspnet:10.0-resolute
 
-          - name: ABCpdf14-chiseled
+          - name: abcpdf14-chiseled
             dockerfile: dockerfiles/abcpdf14-chiseled.Dockerfile
             dotnet-version: "10.0"
             abcpdf-version: "14"
@@ -132,6 +132,7 @@ jobs:
         run: |
           docker run --rm \
             --name TestABCpdf-${{ matrix.name }} \
+            --env ABCPDF_LICENSE_KEY=${{ env.ABCPDF_LICENSE_KEY }} \
             ${{ env.TEST_APP_IMAGE_TAG }}
 
       # ---- Scan -----------------------------------------------------------------
