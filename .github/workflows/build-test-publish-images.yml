@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - rationalise-images
   schedule:
      - cron: '0 3 * * 2'  # 4am UK time on Tuesdays (3am UTC for BST, 4am UTC would be 5am BST)
   workflow_dispatch:
@@ -16,51 +17,53 @@ jobs:
       matrix:
         include:
           # Deprecated images
-          - name: bookworm-slim-6.0
-            dockerfile: dockerfiles/mcr-aspnet-bookworm-slim.Dockerfile
+          # NB Bookworm security support updates end June 2028
+          - name: bookworm-slim-6.0 # Support ends June 2028
+            dockerfile: dockerfiles/deprecated/mcr-aspnet-bookworm-slim.Dockerfile
             dotnet-version: "6.0"
             abcpdf-version: "13"
             tags: |
               abcpdf/mcr-aspnet:6.0-bookworm-slim
 
           - name: bookworm-slim-7.0
-            dockerfile: dockerfiles/mcr-aspnet-bookworm-slim.Dockerfile
+            dockerfile: dockerfiles/deprecated/mcr-aspnet-bookworm-slim.Dockerfile
             dotnet-version: "7.0"
             abcpdf-version: "13"
             tags: |
               abcpdf/mcr-aspnet:7.0-bookworm-slim
 
+          - name: bookworm-slim-8.0
+            dockerfile: dockerfiles/deprecated/mcr-aspnet-bookworm-slim.Dockerfile
+            dotnet-version: "8.0"
+            abcpdf-version: "13"
+            tags: |
+              abcpdf/mcr-aspnet:8.0-bookworm-slim
+
+          # NB Jammy security support updates end May 2027
           - name: jammy-6.0
-            dockerfile: dockerfiles/mcr-aspnet-jammy.Dockerfile
+            dockerfile: dockerfiles/deprecated/mcr-aspnet-jammy.Dockerfile
             dotnet-version: "6.0"
             abcpdf-version: "13"
             tags: |
               abcpdf/mcr-aspnet:6.0-jammy
 
           - name: jammy-7.0
-            dockerfile: dockerfiles/mcr-aspnet-jammy.Dockerfile
+            dockerfile: dockerfiles/deprecated/mcr-aspnet-jammy.Dockerfile
             dotnet-version: "7.0"
             abcpdf-version: "13"
             tags: |
               abcpdf/mcr-aspnet:7.0-jammy
 
-          # Currently supported
-          - name: bookworm-slim-8.0
-            dockerfile: dockerfiles/mcr-aspnet-bookworm-slim.Dockerfile
-            dotnet-version: "8.0"
-            abcpdf-version: "13"
-            tags: |
-              abcpdf/mcr-aspnet:8.0-bookworm-slim
-
           - name: jammy-8.0
-            dockerfile: dockerfiles/mcr-aspnet-jammy.Dockerfile
+            dockerfile: dockerfiles/deprecated/mcr-aspnet-jammy.Dockerfile
             dotnet-version: "8.0"
             abcpdf-version: "13"
             tags: |
               abcpdf/mcr-aspnet:8.0-jammy
 
+          # NB Noble security support updates end May 2029
           - name: noble-8.0
-            dockerfile: dockerfiles/mcr-aspnet-noble.Dockerfile
+            dockerfile: dockerfiles/deprecated/mcr-aspnet-noble.Dockerfile
             dotnet-version: "8.0"
             abcpdf-version: "13"
             # noble is the default OS for its dotnet version, so it also gets
@@ -70,30 +73,29 @@ jobs:
               abcpdf/mcr-aspnet:8.0
 
           - name: noble-10.0
-            dockerfile: dockerfiles/mcr-aspnet-noble.Dockerfile
+            dockerfile: dockerfiles/deprecated/mcr-aspnet-noble.Dockerfile
             dotnet-version: "10.0"
             abcpdf-version: "13"
             tags: |
               abcpdf/mcr-aspnet:10.0-noble
               abcpdf/mcr-aspnet:10.0
 
-          - name: resolute-10.0
-            dockerfile: dockerfiles/mcr-aspnet-resolute.Dockerfile
+          # NB Resolute security support updates end May 2031
+          - name: ABCpdf14
+            dockerfile: dockerfiles/abcpdf14.Dockerfile
             dotnet-version: "10.0"
             abcpdf-version: "14"
+            # NB 2nd tag is in deprecated repository but we keep it updated from here anyway
             tags: |
-              abcpdf/mcr-aspnet:10.0-resolute
               abcpdf/abcpdf:14
+              abcpdf/mcr-aspnet:10.0-resolute
 
-          - name: resolute-chiseled
-            dockerfile: dockerfiles/abcpdf14-resolute-chiseled.Dockerfile
+          - name: ABCpdf14-chiseled
+            dockerfile: dockerfiles/abcpdf14-chiseled.Dockerfile
             dotnet-version: "10.0"
             abcpdf-version: "14"
-            # One tag per line - add as many as you like.
             tags: |
               abcpdf/abcpdf:14-chiseled
-          # Add more images here as they're created - just give each one a
-          # unique name, dockerfile, and its own list of tags.
 
     env:
       ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF14_LICENSE_KEY }}
@@ -129,7 +131,6 @@ jobs:
       - name: Run test application
         run: |
           docker run --rm \
-            --env ABCPDF_LICENSE_KEY=${{ env.ABCPDF_LICENSE_KEY }} \
             --name TestABCpdf-${{ matrix.name }} \
             ${{ env.TEST_APP_IMAGE_TAG }}
 
@@ -170,7 +171,7 @@ jobs:
           echo "${{ matrix.tags }}" | while IFS= read -r tag; do
             [ -z "$tag" ] && continue
             docker tag "${{ env.BASE_IMAGE_TAG }}" "$tag"
-            docker push "$tag"
+            docker push "$tag" || { echo "Failed to push $tag"; exit 1; }
           done
 
   publish-scan-reports:
