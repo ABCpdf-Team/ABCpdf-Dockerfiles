@@ -18,7 +18,6 @@ jobs:
           # Deprecated images
           - name: bookworm-slim-6.0
             dockerfile: dockerfiles/mcr-aspnet-bookworm-slim.Dockerfile
-            target: ""
             dotnet-version: "6.0"
             abcpdf-version: "13"
             tags: |
@@ -26,7 +25,6 @@ jobs:
 
           - name: bookworm-slim-7.0
             dockerfile: dockerfiles/mcr-aspnet-bookworm-slim.Dockerfile
-            target: ""
             dotnet-version: "7.0"
             abcpdf-version: "13"
             tags: |
@@ -34,7 +32,6 @@ jobs:
 
           - name: jammy-6.0
             dockerfile: dockerfiles/mcr-aspnet-jammy.Dockerfile
-            target: ""
             dotnet-version: "6.0"
             abcpdf-version: "13"
             tags: |
@@ -42,7 +39,6 @@ jobs:
 
           - name: jammy-7.0
             dockerfile: dockerfiles/mcr-aspnet-jammy.Dockerfile
-            target: ""
             dotnet-version: "7.0"
             abcpdf-version: "13"
             tags: |
@@ -51,7 +47,6 @@ jobs:
           # Currently supported
           - name: bookworm-slim-8.0
             dockerfile: dockerfiles/mcr-aspnet-bookworm-slim.Dockerfile
-            target: ""
             dotnet-version: "8.0"
             abcpdf-version: "13"
             tags: |
@@ -59,7 +54,6 @@ jobs:
 
           - name: jammy-8.0
             dockerfile: dockerfiles/mcr-aspnet-jammy.Dockerfile
-            target: ""
             dotnet-version: "8.0"
             abcpdf-version: "13"
             tags: |
@@ -67,7 +61,6 @@ jobs:
 
           - name: noble-8.0
             dockerfile: dockerfiles/mcr-aspnet-noble.Dockerfile
-            target: ""
             dotnet-version: "8.0"
             abcpdf-version: "13"
             # noble is the default OS for its dotnet version, so it also gets
@@ -78,7 +71,6 @@ jobs:
 
           - name: noble-10.0
             dockerfile: dockerfiles/mcr-aspnet-noble.Dockerfile
-            target: ""
             dotnet-version: "10.0"
             abcpdf-version: "13"
             tags: |
@@ -87,23 +79,21 @@ jobs:
 
           - name: resolute-10.0
             dockerfile: dockerfiles/mcr-aspnet-resolute.Dockerfile
-            target: ""
             dotnet-version: "10.0"
             abcpdf-version: "14"
             tags: |
               abcpdf/mcr-aspnet:10.0-resolute
-              abcpdf/abcpdf:10.0-resolute
+              abcpdf/abcpdf:14
 
           - name: resolute-chiseled
             dockerfile: dockerfiles/abcpdf14-resolute-chiseled.Dockerfile
-            target: final-runtime
             dotnet-version: "10.0"
             abcpdf-version: "14"
             # One tag per line - add as many as you like.
             tags: |
-              abcpdf/abcpdf:10.0-resolute-chiseled
+              abcpdf/abcpdf:14.0-chiseled
           # Add more images here as they're created - just give each one a
-          # unique name, dockerfile/target, and its own list of tags.
+          # unique name, dockerfile, and its own list of tags.
 
     env:
       ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF14_LICENSE_KEY }}
@@ -120,7 +110,6 @@ jobs:
         run: |
           docker build \
             -f ${{ matrix.dockerfile }} \
-            ${{ matrix.target != '' && format('--target {0}', matrix.target) || '' }} \
             --build-arg DOTNET_VERSION=${{ matrix.dotnet-version }} \
             -t ${{ env.BASE_IMAGE_TAG }} \
             ./dockerfiles

@@ -6,30 +6,19 @@
 # Canonical's Chisel tool against the "ubuntu-26.04" chisel-releases branch:
 # https://github.com/canonical/chisel-releases/tree/ubuntu-26.04
 #
-# This file produces two images from one shared "chisel-common" stage, picked
-# with `--target`:
+# This file produces a single image, final-runtime (the default target, ie.
+# plain `docker build` with no --target): the immutable image meant to be
+# shipped. Ends on `USER $APP_UID` and has just the ASP.NET Core runtime -
+# no shell, no dotnet SDK.
 #
-#   - final-runtime (default target, ie. plain `docker build` with no
-#     --target): the immutable image meant to be shipped. Ends on
-#     `USER $APP_UID` and has just the ASP.NET Core runtime.
-#   - final-sdk (`--target final-sdk`): meant to be inherited from, not
-#     shipped as-is. Has the full dotnet SDK (its slice already
-#     essential-chains in the runtime, so nothing is lost), plus a minimal
-#     shell (dash's /bin/sh, used as the default RUN shell), bash
-#     (/usr/bin/bash, for scripts/tooling that specifically need it), `rm`
-#     and `chmod`. fontconfig's `fc-cache` is already in chisel-common. This
-#     lets an inheriting Dockerfile do things like:
-#
-#       COPY Rez/fonts/* /usr/local/share/fonts
-#       COPY Rez/fonts/linux_specific/* /usr/local/share/fonts
-#       RUN cd /usr/local/share/fonts && rm -f restricted.ttf 49038501.ttf *.txt *.bmp *.zip && fc-cache -f -v
-#
-#     `cd` is a shell builtin so it comes for free with dash. It does NOT end
-#     on `USER $APP_UID` - RUN instructions like the one above need to run as
-#     root during the inheriting image's build, matching the existing
-#     mcr-aspnet-resolute.Dockerfile convention where the consuming
-#     Dockerfile (eg. TestApplication/Dockerfile) sets `USER $APP_UID` itself
-#     at the end.
+# Because final-runtime has no shell, a consuming Dockerfile can't `RUN`
+# anything against it (eg. `fc-cache` after copying in extra fonts). Do that
+# kind of thing in the consuming Dockerfile itself instead, using the same
+# chisel-slicing technique as this file: chisel the SDK/shell/tools you need
+# from a full `ubuntu:resolute` image in a build stage, then `COPY` the
+# result onto this image - `COPY` doesn't need a shell in the target image,
+# only `RUN` does. See dockerfiles/abcpdftest-chiseled.Dockerfile for a
+# worked example (fonts + a full chiselled dotnet SDK).
 #
 # libgtk-3-0 and libegl1 (needed by ABCpdf's embedded Chromium engine for
 # headless HTML rendering) have no Chisel slice definitions anywhere upstream
@@ -40,7 +29,7 @@
 ARG DOTNET_VERSION=10.0
 
 # ---- Stage: chisel-common ----------------------------------------------------
-# Everything shared between the runtime and SDK variants.
+# Base slices shared by anything built on top of this image.
 FROM ubuntu:resolute AS chisel-common
 ARG DEBIAN_FRONTEND=noninteractive
 ARG CHISEL_VERSION=v1.4.2
@@ -101,10 +90,8 @@ RUN mkdir -p /rootfs/var/lib/dpkg \
             tzdata-legacy_zoneinfo \
             curl_bins \
             libcurl3t64-gnutls_libs \
+            python3_standard \
             fontconfig_bins \
-            fonts-noto-core_fonts \
-            fonts-noto-core_config \
-            fonts-noto-color-emoji_fonts \
             libasound2t64_libs \
             libatk1.0-0t64_libs \
             libatk-bridge2.0-0t64_libs \
@@ -156,19 +143,6 @@ RUN chisel-wrapper --generate-dpkg-status /rootfs/var/lib/dpkg/status -- \
         --release ubuntu-26.04 --ignore=unstable --root /rootfs \
             aspnetcore-runtime-${DOTNET_VERSION}_standard
 
-# ---- Stage: chisel-sdk --------------------------------------------------------
-# Adds the full dotnet SDK plus a minimal shell/rm/chmod on top of
-# chisel-common.
-FROM chisel-common AS chisel-sdk
-ARG DOTNET_VERSION
-RUN chisel-wrapper --generate-dpkg-status /rootfs/var/lib/dpkg/status -- \
-        --release ubuntu-26.04 --ignore=unstable --root /rootfs \
-            dotnet-sdk-${DOTNET_VERSION}_standard \
-            dash_bins \
-            bash_bins \
-            coreutils_rm-bin \
-            coreutils_chmod
-
 # ---- Stage: apt-extra --------------------------------------------------------
 FROM ubuntu:resolute AS apt-extra
 ARG DEBIAN_FRONTEND=noninteractive
@@ -195,23 +169,8 @@ RUN dpkg-query -W -f='${Package}\n' | sort > /all-packages.txt \
     && while read -r f; do if [ -f "$f" ]; then printf '%s\n' "$f"; fi; done < /file-list.sorted > /file-list.txt \
     && tar -cf - --files-from=/file-list.txt | tar -xf - -C /rootfs-extra
 
-# ---- Final stage: SDK variant -------------------------------------------------
-FROM scratch AS final-sdk
-
-ENV \
-    APP_UID=1654 \
-    ASPNETCORE_HTTP_PORTS=8080 \
-    DOTNET_RUNNING_IN_CONTAINER=true
-
-COPY --from=chisel-sdk /rootfs/ /
-COPY --from=apt-extra /rootfs-extra/ /
-# Workaround for https://github.com/moby/moby/issues/38710
-COPY --from=chisel-sdk --chown=1654:1654 /rootfs/home/app /home/app
-
-# No `USER $APP_UID` here on purpose - see the note at the top of this file.
-
 # ---- Final stage: runtime variant (default `docker build` target) ------------
-FROM scratch AS final-runtime
+FROM scratch
 
 ENV \
     APP_UID=1654 \
