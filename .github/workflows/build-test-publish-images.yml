@@ -5,7 +5,7 @@ on:
     branches:
       - main
   schedule:
-     - cron: '0 3 * * 2'  # 4am UK time on Tuesdays (3am UTC for BST, 4am UTC would be 5am BST)
+      - cron: '0 3 * * 2'  # 3am UTC every Tuesday (4am BST / 3am GMT)
   workflow_dispatch:
 
 jobs:

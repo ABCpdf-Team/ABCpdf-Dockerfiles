@@ -56,8 +56,7 @@ RUN apt-get update \
     fonts-noto-mono \
     fonts-noto-color-emoji \
     && fc-cache -f -v 
-RUN apt-get install -y wget && \
-    wget http://archive.ubuntu.com/ubuntu/pool/main/i/icu/libicu70_70.1-2_amd64.deb && \
-    dpkg -i libicu70_70.1-2_amd64.deb && \
-    apt-get remove -y wget && \
-    rm -f libicu70_70.1-2_amd64.deb
+RUN curl -fSL https://archive.ubuntu.com/ubuntu/pool/main/i/icu/libicu70_70.1-2_amd64.deb -o libicu70_70.1-2_amd64.deb \
+    && sha256sum libicu70_70.1-2_amd64.deb | grep -q "^58a154f6307289813da2276f900498ef536ae7c0522d2cf31a3c3c5cf62dfd9a" \
+    && dpkg -i libicu70_70.1-2_amd64.deb \
+    && rm -f libicu70_70.1-2_amd64.deb
