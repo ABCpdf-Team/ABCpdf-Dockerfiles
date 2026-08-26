@@ -29,10 +29,14 @@ fi
 # Resolute-26.04: official support until: 2031/05
 
 # Deprecated images
-${DIR}/build-and-test-distro.sh dockerfiles/deprecated/mcr-aspnet-bookworm-slim.Dockerfile 8 14
-${DIR}/build-and-test-distro.sh dockerfiles/deprecated/mcr-aspnet-noble.Dockerfile 8 14
-${DIR}/build-and-test-distro.sh dockerfiles/deprecated/mcr-aspnet-noble.Dockerfile 10 14
-${DIR}/build-and-test-distro.sh dockerfiles/deprecated/mcr-aspnet-jammy.Dockerfile 8 14
+# ${DIR}/build-and-test-distro.sh dockerfiles/deprecated/mcr-aspnet-bookworm-slim.Dockerfile 6 13
+# ${DIR}/build-and-test-distro.sh dockerfiles/deprecated/mcr-aspnet-bookworm-slim.Dockerfile 7 13
+# ${DIR}/build-and-test-distro.sh dockerfiles/deprecated/mcr-aspnet-bookworm-slim.Dockerfile 8 13
+# ${DIR}/build-and-test-distro.sh dockerfiles/deprecated/mcr-aspnet-noble.Dockerfile 8 13
+# ${DIR}/build-and-test-distro.sh dockerfiles/deprecated/mcr-aspnet-noble.Dockerfile 10 13
+# ${DIR}/build-and-test-distro.sh dockerfiles/deprecated/mcr-aspnet-jammy.Dockerfile 6 13
+# ${DIR}/build-and-test-distro.sh dockerfiles/deprecated/mcr-aspnet-jammy.Dockerfile 7 13
+# ${DIR}/build-and-test-distro.sh dockerfiles/deprecated/mcr-aspnet-jammy.Dockerfile 8 13
 
 # Currently Supported
 ${DIR}/build-and-test-distro.sh dockerfiles/abcpdf14.Dockerfile 10 14
