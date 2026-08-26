@@ -60,8 +60,8 @@ RUN if [ -f /app/publish/ABCChrome146/ABCChrome146 ]; then chmod o+x /app/publis
 
 FROM base AS debug
 WORKDIR /app
-COPY --from=publish /app/publish/ABCChrome123 /usr/local/bin/ABCChrome123
-COPY --from=publish /app/publish/ABCChrome146 /usr/local/bin/ABCChrome146
+RUN if [ -f /app/publish/ABCChrome146/ABCChrome123 ]; then cp -r /app/publish/ABCChrome123 /usr/local/bin/ABCChrome123; fi
+RUN if [ -f /app/publish/ABCChrome146/ABCChrome146 ]; then cp -r /app/publish/ABCChrome146 /usr/local/bin/ABCChrome146; fi
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
