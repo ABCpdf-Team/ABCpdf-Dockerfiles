@@ -6,6 +6,7 @@ RUN apt-get update \
     && apt-get upgrade -y\
     && apt-get install --no-install-recommends -y \
     ca-certificates \
+    curl \
     libasound2t64 \
     libatk1.0-0t64 \
     libatk-bridge2.0-0t64 \
@@ -16,9 +17,11 @@ RUN apt-get update \
     libbsd0 \
     libcairo2 \
     libcups2t64 \
+    libcurl3-gnutls \
     libdatrie1 \
     libdbus-1-3 \
     libdrm2 \
+    libegl1 \
     libfontconfig1 \
     libfreetype6 \
     libfribidi0 \
@@ -50,7 +53,4 @@ RUN apt-get update \
     libxkbcommon0 \
     libxrandr2 \
     libxrender1 \
-    libegl1 \
-    curl \
-    libcurl3-gnutls \
     python3

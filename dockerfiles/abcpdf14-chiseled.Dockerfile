@@ -77,20 +77,8 @@ RUN install --directory --mode 0755 /rootfs/usr/local/share/fonts
 RUN mkdir -p /rootfs/var/lib/dpkg \
     && chisel-wrapper --generate-dpkg-status /rootfs/var/lib/dpkg/status -- \
         --release ubuntu-26.04 --ignore=unstable --root /rootfs \
-            base-files_base \
-            base-files_chisel \
-            base-files_release-info \
             ca-certificates_data \
-            libc6_libs \
-            libgcc-s1_libs \
-            libssl3t64_libs \
-            libstdc++6_libs \
-            libicu78_libs \
-            tzdata_zoneinfo \
-            tzdata-legacy_zoneinfo \
             curl_bins \
-            libcurl3t64-gnutls_libs \
-            python3_standard \
             fontconfig_bins \
             libasound2t64_libs \
             libatk1.0-0t64_libs \
@@ -102,6 +90,7 @@ RUN mkdir -p /rootfs/var/lib/dpkg \
             libbsd0_libs \
             libcairo2_libs \
             libcups2t64_libs \
+            libcurl3t64-gnutls_libs \
             libdatrie1_libs \
             libdbus-1-3_libs \
             libdrm2_libs \
@@ -111,6 +100,7 @@ RUN mkdir -p /rootfs/var/lib/dpkg \
             libglib2.0-0t64_libs \
             libgraphite2-3_libs \
             libharfbuzz0b_libs \
+            libicu78_libs \
             libmd0_libs \
             libnspr4_libs \
             libnss3_libs \
@@ -118,7 +108,6 @@ RUN mkdir -p /rootfs/var/lib/dpkg \
             libpixman-1-0_libs \
             libpng16-16t64_libs \
             libthai0_libs \
-            libudev1_libs \
             libwayland-server0_libs \
             libx11-6_libs \
             libxau6_libs \
@@ -133,7 +122,18 @@ RUN mkdir -p /rootfs/var/lib/dpkg \
             libxi6_libs \
             libxkbcommon0_libs \
             libxrandr2_libs \
-            libxrender1_libs
+            libxrender1_libs \
+            python3_standard \
+            base-files_base \
+            base-files_chisel \
+            base-files_release-info \
+            libc6_libs \
+            libgcc-s1_libs \
+            libssl3t64_libs \
+            libstdc++6_libs \
+            libudev1_libs \
+            tzdata_zoneinfo \
+            tzdata-legacy_zoneinfo
 
 # ---- Stage: chisel-runtime ---------------------------------------------------
 # Adds just the ASP.NET Core runtime on top of chisel-common.
