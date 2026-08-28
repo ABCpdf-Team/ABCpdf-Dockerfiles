@@ -18,6 +18,10 @@ Or in a Dockerfile
 
 `FROM abcpdf/mcr-aspnet:10.0 AS base`
 
+## Performance Optimizations 
+
+See [Optimizing Containerization for High-Performance HTML Rendering with ABCpdf .NET](./Optimization.md) for
+
 ## Advantages of Using the Current Images
 
 - **Latest security patches** – Our weekly builds (every Tuesday at 3am UTC) include the most recent OS and library fixes, reducing exposure to known vulnerabilities.
