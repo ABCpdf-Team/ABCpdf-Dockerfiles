@@ -12,15 +12,24 @@ The current Trivy security scan results can be found [here](https://abcpdf-team.
 
 For .NET 10 you might use this.
 
-`docker pull abcpdf/mcr-aspnet:10.0`
+`docker pull abcpdf/abcpdf:14`
 
 Or in a Dockerfile
 
-`FROM abcpdf/mcr-aspnet:10.0 AS base`
+`FROM abcpdf/abcpdf:14 AS base`
 
 ## Performance Optimizations 
 
 See [Optimizing Containerization for High-Performance HTML Rendering with ABCpdf .NET](./Optimization.md) for
+shared memory, ulimit, and CPU configuration guidance.
+
+## Chiseled Image
+
+The `abcpdf/abcpdf:14-chiseled` variant is built from `scratch` using Canonical's Chisel tool, which slices only the exact files needed by the ASP.NET Core runtime and ABCChrome. The result is a significantly smaller image than the full runtime variant — no shell, no package manager, no unnecessary libraries. This minimal footprint makes it the recommended production image for environments where security, scan results, and deployment size matter.
+
+### Customising the Chiseled Image
+
+See [Chisel-customisation.md](./Chisel-customisation.md) for how to add fonts, libraries, and other packages to `abcpdf/abcpdf:14-chiseled` using the two-stage chisel-extra pattern.
 
 ## Advantages of Using the Current Images
 
