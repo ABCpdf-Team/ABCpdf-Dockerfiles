@@ -6,7 +6,7 @@ Build stages must use `ubuntu:resolute` (26.04) to match the runtime's glibc and
 
 ---
 
-## Fonts
+## Adding Fonts
 
 The base image already creates `/usr/local/share/fonts`. Rebuild the fontconfig cache too — without it fonts are still found, but every process start rescans them.
 
@@ -27,6 +27,8 @@ COPY --from=fonts /var/cache/fontconfig /var/cache/fontconfig
 USER $APP_UID
 WORKDIR /app
 ```
+
+*Notes:*
 
 - `COPY fonts/` not `COPY fonts/*.ttf` — a glob matching nothing is a build error.
 - For a distribution font package (`fonts-noto-cjk`), copy `/usr/share/fonts` instead.
@@ -63,7 +65,7 @@ USER $APP_UID
 WORKDIR /app
 ```
 
-Notes:
+*Notes:*
 - **The `[ -f ]` filter is required.** `dpkg -L` lists directories; tar recurses into them and archives the whole build stage. Use `if/then/fi`, not `[ -f "$f" ] && ...` — with `&&`, a failing final entry makes the `RUN` fail.
 - **The diff is the safety property.** `comm -13` yields only packages not already in `ubuntu:resolute`, so shared libraries like `libc6` can never overwrite the base image's copies.
 
@@ -80,6 +82,8 @@ RUN mkdir -p /rootfs/var/lib/dpkg \
 FROM abcpdf/abcpdf:14-chiseled
 COPY --from=chisel-extra /rootfs/usr/lib /usr/lib
 ```
+
+*Notes:*
 
 - **Verify slice names** against the [ubuntu-26.04 branch](https://github.com/canonical/chisel-releases/tree/ubuntu-26.04/slices) or `chisel find --release ubuntu-26.04 'libxml2*'`.
 - **Copy subtrees, not `/rootfs/` to `/`.** Chisel's generated `var/lib/dpkg/status` lists only its own slices. Overwrite the base one and scanners report an inventory of just your additions — a wrong SBOM that looks clean. `apt-extra` doesn't have this problem.
