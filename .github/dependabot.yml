@@ -1,7 +1,42 @@
 version: 2
 updates:
+  # ABCpdf* packages are capped at minor/patch here deliberately: TestApplication's
+  # Directory.Build.props conditions the ABCChrome146 package on
+  # '$(ABCPDF_VERSION) == 14.*' - a major ABCpdf bump needs that condition (and the
+  # ABCChrome123/146 paths referenced in TestApplication/Dockerfile) updated to match by hand.
+  # Merging a major package bump alone would leave the test app wired to an ABCChrome package
+  # that no longer matches what ships in the new ABCpdf major version.
+  # If ABCpdf ships a new major version, bump these packages (and the Directory.Build.props
+  # condition) to match manually.
+  #
+  # cooldown holds off proposing a version until it's been published for at least that many days -
+  # a minimum-package-age gate against supply chain attacks where a compromised release gets
+  # published and pulled in before anyone notices something's wrong with it. Patches (often
+  # security fixes themselves) get a short window so we're not slow to receive those; majors get
+  # the longest, since they're higher-impact and rarely urgent.
+  - package-ecosystem: "nuget"
+    directory: "/TestApplication"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "ABCpdf*"
+        update-types: ["version-update:semver-major"]
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
+      semver-minor-days: 7
+      semver-patch-days: 3
+
+  # No docker-ecosystem entry: the base images referenced in /dockerfiles and /TestApplication
+  # (mcr.microsoft.com/dotnet/*, ubuntu:resolute) are exactly what this repo's own weekly build
+  # pipeline already tracks and rebuilds against - that pipeline *is* the update mechanism, so a
+  # Dependabot docker entry here would just propose the same bumps a second time.
+  #
+  # semver-*-days isn't supported for this ecosystem (tags aren't guaranteed to be semver), so
+  # only default-days applies here.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
-    minimum-age: 30
+      interval: "weekly"
+    cooldown:
+      default-days: 7

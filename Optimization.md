@@ -1,12 +1,12 @@
-# Optimizing Containerization for High-Performance HTML Rendering with ABCpdf .NET
+# Optimizing Containerization for High-Performance HTML Rendering with ABCpdf.NET
 
 ## Introduction
 
-ABCpdf .NET uses the **ABCChrome146 HTML rendering engine** for HTML conversion.
+ABCpdf.NET uses the **ABCChrome146 HTML rendering engine** for HTML conversion.
 
 Inside containerised environments (Docker, Podman, or WSL2), achieving reliable, high-speed performance requires specific runtime configuration.
 
-Indeed for other complex PDF conversion operations using ABCpdf .NET you may find these principles to be similarly relevant.
+Indeed for other complex PDF conversion operations using ABCpdf.NET you may find these principles to be similarly relevant.
 
 ABCChrome146 is built on **Chromium 146** - a modern, resource-intensive, multi-process browser engine. Correctly configuring your container runtime ensures:
 
@@ -14,7 +14,7 @@ ABCChrome146 is built on **Chromium 146** - a modern, resource-intensive, multi-
 - **Zero timeouts**, even under concurrent load
 - **Stable production deployments** without intermittent failures
 
-This definitive guide covers the essential Docker settings for production-grade ABCChrome146 deployments. It is the canonical source for details of Docker settings for HTML conversion using ABCpdf .NET.
+This definitive guide covers the essential Docker settings for production-grade ABCChrome146 deployments. It is the canonical source for details of Docker settings for HTML conversion using ABCpdf.NET.
 
 ## Critical Configuration: Shared Memory (`/dev/shm`)
 

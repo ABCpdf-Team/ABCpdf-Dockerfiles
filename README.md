@@ -2,25 +2,32 @@
 
 This repo contains pipelines to build and push the most up-to-date images for our Docker Hub repositories.
 
-These Docker images bundle the ABCpdf .NET library on top of Microsoft's official .NET runtime images, giving you a ready-to-run environment for PDF generation and manipulation.
+These Docker images bundle the ABCpdf.NET library on top of Microsoft's official .NET runtime images, giving you a ready-to-run environment for PDF generation and manipulation.
 
-The current images can be found at [docker.com](https://hub.docker.com/r/abcpdf/abcpdf).
+The current images can be found at [Docker Hub ABCpdf repository](https://hub.docker.com/r/abcpdf/abcpdf).
 
 The current Trivy security scan results can be found [here](https://abcpdf-team.github.io/ABCpdf-Dockerfiles/).
 
 ## Quick Start
 
-For .NET 10 you might use this.
+For ABCpdf 14 you might use this.
 
-`docker pull abcpdf/abcpdf:14`
+```bash
+docker pull abcpdf/abcpdf:14
+```
 
 Or in a Dockerfile
 
-`FROM abcpdf/abcpdf:14 AS base`
+```dockerfile
+FROM abcpdf/abcpdf:14 AS base
+USER app
+WORKDIR /app
+EXPOSE 8080
+```
 
-## Performance Optimizations 
+## Performance Optimizations
 
-See [Optimizing Containerization for High-Performance HTML Rendering with ABCpdf .NET](./Optimization.md) for
+See [Optimizing Containerization for High-Performance HTML Rendering with ABCpdf.NET](./Optimization.md) for
 shared memory, ulimit, and CPU configuration guidance.
 
 ## Chiseled Image
@@ -42,8 +49,40 @@ See [Chisel-customisation.md](./Chisel-customisation.md) for how to add fonts, l
 
 - **Unannounced breaking changes** – Even with scanning, an update may introduce behavioural or API changes that break your application if you haven't tested against the new image.
 - **Limited manual testing** – Automated builds only include automated sanity checks. Rare edge-case regressions could reach users before they are noticed.
-- **Unexpected dependency churn** – A security fix for one library might upgrade another dependency altering performance or compatibility.
-- **No version pinning by default** – If you always pull the latest your environment can change without a code deploy.
+- **Unexpected dependency churn** – A security fix for one library might upgrade another dependency, altering performance or compatibility.
+- **No version pinning by default** – If you always pull the latest, your environment can change without a code deploy.
+
+### Pinning to a digest
+
+A tag is a moving pointer. Because we rebuild weekly, `abcpdf/abcpdf:14` will resolve to a different image next Tuesday than it does today. If you need a byte-identical, reproducible build, pin to the image digest instead.
+
+Find the digest of the image you have tested against:
+
+```bash
+# Without pulling the image
+docker buildx imagetools inspect abcpdf/abcpdf:14
+
+# Or, if you have already pulled it
+docker inspect --format='{{index .RepoDigests 0}}' abcpdf/abcpdf:14
+```
+
+Then reference it with `@sha256:` in place of, or alongside, the tag:
+
+```bash
+docker pull abcpdf/abcpdf@sha256:<digest>
+```
+
+```dockerfile
+FROM abcpdf/abcpdf:14@sha256:<digest> AS base
+USER app
+WORKDIR /app
+EXPOSE 8080
+```
+
+Keeping the tag in front of the digest is good practice. Docker resolves the digest and ignores the tag, but the tag tells a human reader which major version they are looking at.
+
+>**Digest pinning turns off the benefit of our weekly rebuilds.**
+>A pinned image will never pick up an OS or application security update, so a build that passes its vulnerability scan today will start failing as CVEs accumulate against it. Pin deliberately, and pair it with something that moves the pin for you — Renovate and Dependabot both raise pull requests for outdated digest references in Dockerfiles — or mirror tested images into your own registry and promote them on your own schedule.
 
 ## Supply Chain Considerations
 
@@ -58,7 +97,7 @@ Automated builds pull from multiple independent systems, each introducing supply
 
 - **Use current images in development/staging** to catch issues early.
 - **Monitor the weekly build results** (Trivy reports and any build logs) to stay aware of changes.
-- **Mirror to your own registry** - Cache the image you test against and push it to a private registry (eg ECR, ACR, Artifactory). Deployments can then point to your mirrored copy, to be updated at times of your choosing.
-- **Fork this repository and build your own images** – Consider forking the repo and generate images under your own registry. This eliminates reliance on our automated system while keeping the same foundation.
+- **Mirror to your own registry** – Cache the image you test against and push it to a private registry (eg ECR, ACR, Artifactory). Deployments can then point to your mirrored copy, to be updated at times of your choosing.
+- **Fork this repository and build your own images** – Consider forking the repo and generating images under your own registry. This eliminates reliance on our automated system while keeping the same foundation.
 
 By combining the freshness of automated builds with careful promotion, pinning, and supply chain awareness, you get both security and stability.
