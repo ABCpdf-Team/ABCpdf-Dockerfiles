@@ -52,6 +52,24 @@ See [Chisel-customisation.md](./Chisel-customisation.md) for how to add fonts, l
 - **Unexpected dependency churn** – A security fix for one library might upgrade another dependency, altering performance or compatibility.
 - **No version pinning by default** – If you always pull the latest, your environment can change without a code deploy.
 
+### Supply Chain Considerations
+
+Automated builds pull from multiple independent systems, each introducing supply chain risk:
+
+- **Compromised base images or packages** – Upstream registries (Docker Hub etc) and third-party repos (apt, NuGet etc) could be hijacked, injecting vulnerabilities before our build runs.
+- **Build pipeline tampering** – If our CI system's scripts or secrets are compromised, an attacker could alter the final image without changing our source code.
+- **Trivy database poisoning or delay** – The scanner relies on external vulnerability feeds; a stale or corrupted database may miss real threats or flag false negatives.
+- **Registry or mirror compromise** – The image you pull could be replaced by a malicious one if the registry or a cache mirror is breached, even if our build was clean.
+
+### Recommendation
+
+- **Use current images in development/staging** to catch issues early.
+- **Monitor the weekly build results** (Trivy reports and any build logs) to stay aware of changes.
+- **Mirror to your own registry** – Cache the image you test against and push it to a private registry (eg ECR, ACR, Artifactory). Deployments can then point to your mirrored copy, to be updated at times of your choosing.
+- **Fork this repository and build your own images** – Consider forking the repo and generating images under your own registry. This eliminates reliance on our automated system while keeping the same foundation.
+
+By combining the freshness of automated builds with careful promotion, pinning, and supply chain awareness, you get both security and stability.
+
 ### Pinning to a digest
 
 A tag is a moving pointer. Because we rebuild weekly, `abcpdf/abcpdf:14` will resolve to a different image next Tuesday than it does today. If you need a byte-identical, reproducible build, pin to the image digest instead.
@@ -83,21 +101,3 @@ Keeping the tag in front of the digest is good practice. Docker resolves the dig
 
 >**Digest pinning turns off the benefit of our weekly rebuilds.**
 >A pinned image will never pick up an OS or application security update, so a build that passes its vulnerability scan today will start failing as CVEs accumulate against it. Pin deliberately, and pair it with something that moves the pin for you — Renovate and Dependabot both raise pull requests for outdated digest references in Dockerfiles — or mirror tested images into your own registry and promote them on your own schedule.
-
-## Supply Chain Considerations
-
-Automated builds pull from multiple independent systems, each introducing supply chain risk:
-
-- **Compromised base images or packages** – Upstream registries (Docker Hub etc) and third-party repos (apt, NuGet etc) could be hijacked, injecting vulnerabilities before our build runs.
-- **Build pipeline tampering** – If our CI system's scripts or secrets are compromised, an attacker could alter the final image without changing our source code.
-- **Trivy database poisoning or delay** – The scanner relies on external vulnerability feeds; a stale or corrupted database may miss real threats or flag false negatives.
-- **Registry or mirror compromise** – The image you pull could be replaced by a malicious one if the registry or a cache mirror is breached, even if our build was clean.
-
-## Recommendation
-
-- **Use current images in development/staging** to catch issues early.
-- **Monitor the weekly build results** (Trivy reports and any build logs) to stay aware of changes.
-- **Mirror to your own registry** – Cache the image you test against and push it to a private registry (eg ECR, ACR, Artifactory). Deployments can then point to your mirrored copy, to be updated at times of your choosing.
-- **Fork this repository and build your own images** – Consider forking the repo and generating images under your own registry. This eliminates reliance on our automated system while keeping the same foundation.
-
-By combining the freshness of automated builds with careful promotion, pinning, and supply chain awareness, you get both security and stability.
