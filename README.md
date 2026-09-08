@@ -72,6 +72,9 @@ By combining the freshness of automated builds with careful promotion, pinning, 
 
 ### Pinning to a digest
 
+>**N.B. Digest pinning turns off the benefit of our weekly rebuilds.**
+>A pinned image will never pick up an OS or application security update, so a build that passes its vulnerability scan today will start failing as CVEs accumulate against it. Pin deliberately, and pair it with something that moves the pin for you — Renovate and Dependabot both raise pull requests for outdated digest references in Dockerfiles — or mirror tested images into your own registry and promote them on your own schedule.
+
 A tag is a moving pointer. Because we rebuild weekly, `abcpdf/abcpdf:14` will resolve to a different image next Tuesday than it does today. If you need a byte-identical, reproducible build, pin to the image digest instead.
 
 Find the digest of the image you have tested against:
@@ -98,6 +101,3 @@ EXPOSE 8080
 ```
 
 Keeping the tag in front of the digest is good practice. Docker resolves the digest and ignores the tag, but the tag tells a human reader which major version they are looking at.
-
->**Digest pinning turns off the benefit of our weekly rebuilds.**
->A pinned image will never pick up an OS or application security update, so a build that passes its vulnerability scan today will start failing as CVEs accumulate against it. Pin deliberately, and pair it with something that moves the pin for you — Renovate and Dependabot both raise pull requests for outdated digest references in Dockerfiles — or mirror tested images into your own registry and promote them on your own schedule.
