@@ -40,7 +40,7 @@ See [Chisel-customisation.md](./Chisel-customisation.md) for how to add fonts, l
 
 ## Advantages of Using the Current Images
 
-- **Latest security patches** – Our weekly builds (every Tuesday at 3am UTC) include the most recent OS and library fixes, reducing exposure to known vulnerabilities.
+- **Latest security patches** – Our weekly builds (every Tuesday morning UTC) include the most recent OS and library fixes, reducing exposure to known vulnerabilities.
 - **Recent feature updates** – You get new Linux functionality and improvements as soon as they're available, without waiting for a manual release cycle.
 - **Trivy-scanned by default** – Every container is automatically scanned for high-severity issues. Using the current image means you start from a known, audited state.
 - **Predictable refresh cadence** – Updates happen on a fixed schedule, so you can plan your own testing and deployment around Tuesday mornings.
