@@ -2,7 +2,7 @@
 
 This repo contains pipelines to build and push the most up-to-date images for our Docker Hub repositories.
 
-These Docker images bundle the ABCpdf.NET library on top of Microsoft's official .NET runtime images, giving you a ready-to-run environment for PDF generation and manipulation.
+These Docker images bundle the ABCpdf .NET library on top of Microsoft's official .NET runtime images, giving you a ready-to-run environment for PDF generation and manipulation.
 
 The current images can be found at [Docker Hub ABCpdf repository](https://hub.docker.com/r/abcpdf/abcpdf).
 
@@ -27,12 +27,12 @@ EXPOSE 8080
 
 ## Performance Optimizations
 
-See [Optimizing Containerization for High-Performance HTML Rendering with ABCpdf.NET](./Optimization.md) for
+See [Optimizing Containerization for High-Performance HTML Rendering with ABCpdf .NET](./Optimization.md) for
 shared memory, ulimit, and CPU configuration guidance.
 
 ## Chiseled Image
 
-The `abcpdf/abcpdf:14-chiseled` variant is built from `scratch` using Canonical's Chisel tool, which slices only the exact files needed by the ASP.NET Core runtime and ABCChrome. The result is a significantly smaller image than the full runtime variant — no shell, no package manager, no unnecessary libraries. This minimal footprint makes it the recommended production image for environments where security, scan results, and deployment size matter.
+The `abcpdf/abcpdf:14-chiseled` variant is built from `scratch` using Canonical's Chisel tool, which slices only the exact files needed by the ABCpdf .NET Core runtime and ABCChrome. The result is a significantly smaller image than the full runtime variant — no shell, no package manager, no unnecessary libraries. This minimal footprint makes it the recommended production image for environments where security, scan results, and deployment size matter.
 
 ### Customising the Chiseled Image
 
